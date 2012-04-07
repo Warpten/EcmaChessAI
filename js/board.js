@@ -12,7 +12,7 @@
         chessBoard.fn = chessBoard.prototype = {
             // DOM node
             domNode: null,
-			context: null,
+            context: null,
 		
             // Contains all imageData associated to all tiles
             imageDataTiles: [],
