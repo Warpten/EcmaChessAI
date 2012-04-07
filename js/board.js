@@ -20,18 +20,15 @@
             // Defines the size of a cell, can be scaled up or down.
             cellSize: 60,
 
-            // Bitboard containing all pieces on the board matched by their
-            // enum indexes
+            //! Bitboard containing pieces. Each field will have an instance of
+            //! the piece-related class and a flag describing the piece (faster
+            //! than instanceof calls).
             _bitBoard: [[], [], [], [], [], [], [], []],
 
-            // Board containing instances of classes, each having their own
-            // bitboard containing all possible destination cells.
-            _board: [[], [], [], [], [], [], [], []],
-
-            // Who's turn is it to play
+            //! Whose turn is it to play
             _whoseTurnIsIt: ChessEnums.Turn.TURN_WHITE,
 
-            // Side chosen by the player - White per default
+            //! Side chosen by the player - White per default
             _playerSide: ChessEnums.Turn.TURN_WHITE,
             
             // Controls if tiles have already been loaded to image datas
