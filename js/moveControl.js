@@ -10,8 +10,7 @@
             var destCell = this._board[this._destCoords[0]][this._destCoords[1]];
             
             // Disallow move if the targeted cell contains a piece of our side.
-            if ((currentPiece[0] & ChessEnums.Piece.Black) == (destCell[0] & ChessEnums.Piece.Black)
-                || (currentPiece[0] & ChessEnums.Piece.White) == (destCell[0] & ChessEnums.PieceWhite))
+            if ((currentPiece[0] & ChessEnums.Piece.Black) == (destCell[0] & ChessEnums.Piece.Black))
                 return false;
             
             if (currentPiece[0] & ChessEnums.Piece.ROOK) {
