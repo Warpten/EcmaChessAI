@@ -33,6 +33,9 @@
             
             // Controls if tiles have already been loaded to image datas
             _tilesReady: false,
+            
+            // Controls castling allowing
+            _canCastle: [true, true],
 
             constructor: chessBoard,
 
