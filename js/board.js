@@ -57,9 +57,10 @@
             },
             
             initBoard: function() {
+                alert(this.getCellSize());
                 for (var i = 0; i < 8; i++) {
-					var tileData = this.imageDataTiles[this._playerSide == ChessEnums.Turn.TURN_WHITE ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN];
-					this.context.putImageData(tileData, this.getCellSize() * i, this.getCellSize());
+					var tile = this.imageDataTiles[this._playerSide == ChessEnums.Turn.TURN_WHITE ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN];
+					this.context.drawImage(tile, this.getCellSize() * i, this.getCellSize());
 				}
             },
 
@@ -89,15 +90,8 @@
                 Tiles.initTiles();
                 for (var i = 0; i < Tiles.MAX_TILE_NUMBER; i++) {
                     var tileImg = new Image();
-                    var tempCanvas = document.createElement("canvas");
-                    
-                    $(tileImg).load(function() {
-                        tempCanvas.getContext("2d").drawImage(this, 0, 0);
-                    });
                     tileImg.src = Tiles.getTile(i);
-                    this.imageDataTiles[i] = tempCanvas.getContext("2d").getImageData(0, 0, this.getCellSize(), this.getCellSize());
-                    delete tileImg;
-                    delete tempCanvas;
+                    this.imageDataTiles[i] = tileImg;
                 }
                 
                 this._tilesReady = true;

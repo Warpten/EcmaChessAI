@@ -13,7 +13,7 @@
             if ((currentPiece[0] & ChessEnums.Piece.Black) == (destCell[0] & ChessEnums.Piece.Black))
                 return false;
             
-            if (currentPiece[0] & ChessEnums.Piece.ROOK) {
+            if (currentPiece[0] & ChessEnums.Piece.ROOK) { // Rook handler
                 // Disallow moves on anything else than rows and columns
                 if (Math.abs(this._originCoords[0] - this.destCoords[0]) != 0
                     && Math.abs(this._originCoords[1] - this.destCoords[1]) != 0)
