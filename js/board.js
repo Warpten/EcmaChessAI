@@ -29,9 +29,6 @@
             //! Side chosen by the player - White per default
             _playerSide: ChessEnums.Turn.TURN_WHITE,
             
-            // Controls if tiles have already been loaded to image datas
-            _tilesReady: false,
-            
             // Controls castling allowing
             _canCastle: [true, true],
 
