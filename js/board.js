@@ -65,11 +65,16 @@
                 var tileID = this._playerSide == ChessEnums.Turn.TURN_WHITE ? Tiles.TILE_WHITE_KING : Tiles.TILE_BLACK_KING;
                 var initPosition = function(cellSize, coords, ref) {
                     var tile = new Image();
+                    $(tile).load(function() {
+                        ref.context.drawImage(this, cellSize * coords[0], cellSize * (7 - coords[1]), cellSize, cellSize);
+                    });
                     tile.src = Tiles.getTile(tileID);
-                    ref.context.drawImage(tile, cellSize * coords[0], cellSize * (7 - coords[1]), cellSize, cellSize);
+                    
                     var secondTile = new Image();
+                    $(secondTile).load(function() {
+                        ref.context.drawImage(this, cellSize * coords[0], cellSize * coords[1], cellSize, cellSize);
+                    });
                     secondTile.src = Tiles.getTile(tileID - 6 * ref._playerSide);
-                    ref.context.drawImage(secondTile, cellSize * coords[0], cellSize * coords[1], cellSize, cellSize);
                 };
 
                 // Kings

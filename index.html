@@ -7,6 +7,8 @@
 <body>
     <canvas id="drawPlace">Your browser needs to handle canvas for this demo to work.</canvas>
     
+    <input type="button" value="Switch sides" id="sideSwitcher" />
+    
     <script src="./js/enums.js"></script>
     <script src="./js/moveControl.js"></script>
     <script src="./js/tiles.js"></script>
@@ -16,7 +18,11 @@
     
     <script type="text/javascript">
     $(function() {
-        chessBoard(document.getElementById("drawPlace"));
+        var board = chessBoard(document.getElementById("drawPlace"));
+        
+        $('#sideSwitcher').click(function() {
+           board.switchSide(); 
+        });
     });
     </script>
 </body>
