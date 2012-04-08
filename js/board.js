@@ -102,9 +102,9 @@
                         drawingContext.drawImage(tile, cellSize * i, 0);
                     }
                 }
-    			
-				// Bishops
-				{
+                
+                // Bishops
+                {
                     for (var i = 2; i < 6; i += 3) {
                         var tile = new Image();
                         tile.src = Tiles.getTile(sideBottom - 2 + Tiles.COLOR_TILE_OFFSET);
@@ -117,27 +117,27 @@
                         drawingContext.drawImage(tile, cellSize * i, 0);
                     }
                 }
-				
-				// Queens
-				{
-					var tile = new Image();
-					tile.src = Tiles.getTile(sideBottom - 4 + Tiles.COLOR_TILE_OFFSET);
-					drawingContext.drawImage(tile, cellSize * 3, cellSize * 7);
+                
+                // Queens
+                {
+                    var tile = new Image();
+                    tile.src = Tiles.getTile(sideBottom - 4 + Tiles.COLOR_TILE_OFFSET);
+                    drawingContext.drawImage(tile, cellSize * 3, cellSize * 7);
 
-					var tile = new Image();
-					tile.src = Tiles.getTile(sideBottom - 4);
-					drawingContext.drawImage(tile, cellSize * 3, 0);
+                    var tile = new Image();
+                    tile.src = Tiles.getTile(sideBottom - 4);
+                    drawingContext.drawImage(tile, cellSize * 3, 0);
                 }
-				
-				// Kings
-				{
-					var tile = new Image();
-					tile.src = Tiles.getTile(sideBottom - 5 + Tiles.COLOR_TILE_OFFSET);
-					drawingContext.drawImage(tile, cellSize * 4, cellSize * 7);
+                
+                // Kings
+                {
+                    var tile = new Image();
+                    tile.src = Tiles.getTile(sideBottom - 5 + Tiles.COLOR_TILE_OFFSET);
+                    drawingContext.drawImage(tile, cellSize * 4, cellSize * 7);
 
-					var tile = new Image();
-					tile.src = Tiles.getTile(sideBottom - 5);
-					drawingContext.drawImage(tile, cellSize * 4, 0);
+                    var tile = new Image();
+                    tile.src = Tiles.getTile(sideBottom - 5);
+                    drawingContext.drawImage(tile, cellSize * 4, 0);
                 }
             },
 
