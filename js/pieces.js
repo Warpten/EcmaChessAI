@@ -26,6 +26,7 @@
             
             isBlack: function() { return this.typeMask & ChessEnums.Piece.BLACK; },
             isWhite: function() { return this.typeMask & ChessEnums.Piece.WHITE; },
+            getTypeMask: function() { return this.typeMask; }
         };
 
         return Piece;

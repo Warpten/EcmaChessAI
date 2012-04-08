@@ -2,12 +2,15 @@
     var chessBoard = (function() {
         var chessBoard = function(DOMElement) {
             DOMElement.width = DOMElement.height = chessBoard.fn.getCellSize() * 8;
+            
+            var objInstance = new chessBoard.fn.init(DOMElement);
+            
             // Append click handler
             $(DOMElement).click(function(eventData) {
-                chessBoard.fn.onClick(eventData);
+                chessBoard.fn.onClick(eventData.pageX, eventData.pageY, objInstance);
             });
 
-            return new chessBoard.fn.init(DOMElement);
+            return objInstance;
         };
 
         chessBoard.fn = chessBoard.prototype = {
@@ -31,6 +34,9 @@
             
             // Controls castling allowing
             _canCastle: [true, true],
+            
+            // Controls the moving piece
+            _pickedCell: null,
 
             constructor: chessBoard,
 
@@ -97,15 +103,15 @@
                 ++tileID;
                 initPosition([3, 0], this);
                 
-                // Bishops
-                ++tileID;
-                initPosition([2, 0], this);
-                initPosition([5, 0], this);
-                
                 // Knights
                 ++tileID;
                 initPosition([1, 0], this);
                 initPosition([6, 0], this);
+                
+                // Bishops
+                ++tileID;
+                initPosition([2, 0], this);
+                initPosition([5, 0], this);
                 
                 // Rooks
                 ++tileID;
@@ -116,6 +122,18 @@
                 ++tileID;
                 for (var i = 0; i < 8; i++)
                     initPosition([i, 1], this);
+                    
+                this.fillNulls();
+            },
+            
+            /*
+             * @description Fills e,pty cells of the board with null objects
+             */
+            fillNulls: function() {
+                for (var i = 0; i < 8; i++)
+                    for (var j = 0; j < 8; j++)
+                        if (!(this._bitBoard[i][j] instanceof Piece))
+                            this._bitBoard[i][j] = null;
             },
 
             getCellSize: function() { return this.cellSize; },
@@ -180,9 +198,29 @@
             /*
              * @description Handles click interaction with the canvas
              */
-            onClick: function(eventData) {
-                var clickX = eventData.offsetX,
-                    clickY = eventData.offsetY;
+            onClick: function(clickX, clickY, referer) {
+                var $offset = $(referer.domNode).offset();
+                clickX -= $offset.left;
+                clickY -= $offset.top;
+                clickX /= referer.getCellSize();
+                clickY /= referer.getCellSize();
+                var clickCoords = [Math.floor(clickX), Math.floor(clickY)];
+                
+                if ((pickedCell = referer._pickedCell) !== null) {
+                    // A cell has been previously picked - Check the move
+                    if (moveController.init(pickedCell, clickCoords, referer._bitBoard).isValid()) {
+                        console.log('Valid move');
+                    }
+                    else {
+                        console.log('Invalid move, resetting the origin square.');
+                        referer._pickedCell = null;
+                    }
+                }
+                else {
+                    // Select the cell if it's not an empty one
+                    if (referer._bitBoard[clickCoords[1]][clickCoords[0]] !== null)
+                        referer._pickedCell = clickCoords;
+                }
             },
         };
 
