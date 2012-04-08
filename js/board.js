@@ -55,10 +55,15 @@
             },
             
             initBoard: function() {
+                this.cleanBoard();
+                var sideBottom = (this._playerSide == ChessEnums.Turn.TURN_BLACK ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN);
                 for (var i = 0; i < 8; i++) {
-                    var tile = new Image();
-					tile.src = Tiles.getTile(this._playerSide == ChessEnums.Turn.TURN_BLACK ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN);
-					this.context.drawImage(tile, this.getCellSize() * i, this.getCellSize());
+                    var tile = new Image(),
+                        ctx = this;
+                    $(tile).load(function() {
+                        ctx.context.drawImage(tile, ctx.getCellSize() * i, ctx.getCellSize())
+                    });
+					tile.src = Tiles.getTile(sideBottom);
 				}
             },
 
