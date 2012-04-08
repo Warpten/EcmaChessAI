@@ -6,10 +6,10 @@
 
         Piece.fn = Piece.prototype = {
             // Describes the piece
-            typeMask = null,
+            typeMask: null,
             
             // Cell coordinates on the board [x, y]
-            coords = [-1, -1],
+            coords: [-1, -1],
         
             constructor: Piece,
 
