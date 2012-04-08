@@ -77,11 +77,17 @@
                     });
                     tile.src = Tiles.getTile(tileID);
                     
+                    //            y         x
+                    ref._bitBoard[7 - coords[1]][coords[0]] = new Piece(coords, tileID);
+                    
                     var secondTile = new Image();
                     $(secondTile).load(function() {
                         ref.context.drawImage(secondTile, ref.getCellSize() * coords[0], ref.getCellSize() * coords[1], ref.getCellSize(), ref.getCellSize());
                     });
                     secondTile.src = Tiles.getTile(tileID - 6 * ref._playerSide);
+                    
+                    //            y         x
+                    ref._bitBoard[coords[1]][coords[0]] = new Piece(coords, tileID - 6 * ref._playerSide);
                 };
 
                 // Kings
