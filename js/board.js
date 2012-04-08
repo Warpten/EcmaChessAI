@@ -54,6 +54,14 @@
                 return this;
             },
             
+            switchSide: function() {
+                this._playerSide *= ChessEnums.Turn.TURN_BLACK;  
+                this.initBoard(this.context, this.getCellSize());
+                $(this.DOMelement).css({
+                   'background-position': (this._playerSide == ChessEnums.Turn.TURN_BLACK ? this.getCellSize() + 'px 0' : '0px 0px')
+                });
+            },
+            
             initBoard: function(drawingContext, cellSize) {
                 this.cleanBoard();
                 var sideBottom = (this._playerSide == ChessEnums.Turn.TURN_BLACK ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN);
