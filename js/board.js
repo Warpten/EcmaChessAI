@@ -54,55 +54,50 @@
             switchSide: function() {
                 this._playerSide *= ChessEnums.Turn.TURN_BLACK;  
                 this.initBoard(this.context, this.getCellSize());
-                $(this.DOMelement).css({
-                   'background-position': (this._playerSide == ChessEnums.Turn.TURN_BLACK ? this.getCellSize() + 'px 0' : '0px 0px')
-                });
+    			if (this._playerSide == ChessEnums.Turn.TURN_BLACK)
+					$(this.DOMelement).css('background-position', this.getCellSize() + 'px 0px');
+				else $(this.DOMelement).css('background-position', '0px 0px');
             },
             
             initBoard: function(drawingContext, cellSize) {
                 this.cleanBoard();
                 
                 var tileID = this._playerSide == ChessEnums.Turn.TURN_WHITE ? Tiles.TILE_WHITE_KING : Tiles.TILE_BLACK_KING;
-                var initPosition = function(cellSize, coords, ref) {
+                var initPosition = function(coords, ref) {
                     var tile = new Image();
-                    $(tile).load(function() {
-                        ref.context.drawImage(this, cellSize * coords[0], cellSize * (7 - coords[1]), cellSize, cellSize);
-                    });
                     tile.src = Tiles.getTile(tileID);
-                    
+                    ref.context.drawImage(tile, ref.getCellSize() * coords[0], ref.getCellSize() * (7 - coords[1]), ref.getCellSize(), ref.getCellSize());
                     var secondTile = new Image();
-                    $(secondTile).load(function() {
-                        ref.context.drawImage(this, cellSize * coords[0], cellSize * coords[1], cellSize, cellSize);
-                    });
                     secondTile.src = Tiles.getTile(tileID - 6 * ref._playerSide);
+                    ref.context.drawImage(secondTile, ref.getCellSize() * coords[0], ref.getCellSize() * coords[1], ref.getCellSize(), ref.getCellSize());
                 };
 
                 // Kings
-                initPosition(this.getCellSize(), [4, 0], this);
+                initPosition([4, 0], this);
 
                 // Queen
                 ++tileID;
-                initPosition(this.getCellSize(), [3, 0], this);
+                initPosition([3, 0], this);
                 
                 // Bishops
                 ++tileID;
-                initPosition(this.getCellSize(), [2, 0], this);
-                initPosition(this.getCellSize(), [5, 0], this);
+                initPosition([2, 0], this);
+                initPosition([5, 0], this);
                 
                 // Knights
                 ++tileID;
-                initPosition(this.getCellSize(), [1, 0], this);
-                initPosition(this.getCellSize(), [6, 0], this);
+                initPosition([1, 0], this);
+                initPosition([6, 0], this);
                 
                 // Rooks
                 ++tileID;
-                initPosition(this.getCellSize(), [0, 0], this);
-                initPosition(this.getCellSize(), [7, 0], this);
+                initPosition([0, 0], this);
+                initPosition([7, 0], this);
                 
                 // Pawns
                 ++tileID;
                 for (var i = 0; i < 8; i++)
-                    initPosition(this.getCellSize(), [i, 1], this);
+                    initPosition([i, 1], this);
             },
 
             getCellSize: function() { return this.cellSize; },
@@ -181,4 +176,3 @@
     // Expose chessBoard to the global scope
     window.chessBoard = chessBoard;
 })(window);
-
