@@ -1,8 +1,8 @@
-(function (window) {
+(function (window, undefined) {
     var ChessEnums = {
         Turn: {
             TURN_WHITE: 1,
-            TURN_BLACK: -1
+            TURN_BLACK: -1,
         },
         
         Piece: {
@@ -14,7 +14,7 @@
             PAWN:   0x020,
             
             BLACK:  0x100,
-            WHITE:  0x200
+            WHITE:  0x200,
         },
         
         BitMap: {
@@ -26,7 +26,7 @@
             PAWN_POSSIBLE_DEST   : 0x20000,
             
             POSSIBLE_DEST_BLACK  : 0x40000,
-            POSSIBLE_DEST_WHITE  : 0x80000
+            POSSIBLE_DEST_WHITE  : 0x80000,
         }
     };
 

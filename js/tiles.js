@@ -17,6 +17,7 @@
         TILE_WHITE_PAWN   : 11,
         
         MAX_TILE_NUMBER   : 12,
+        COLOR_TILE_OFFSET : 6,
         
         initTiles: function() {
             this.tileMap[this.TILE_BLACK_KING]   = './imgs/bk.png';
@@ -34,7 +35,11 @@
             this.tileMap[this.TILE_WHITE_PAWN]   = './imgs/wp.png';
         },
         
-        getTile: function(tileId) { return this.tileMap[tileId]; }
+        getTile: function(tileId) {
+            if (tileId > this.MAX_TILE_NUMBER)
+                tileId -= this.MAX_TILE_NUMBER;
+            return this.tileMap[tileId];
+        }
     };
 
     window.Tiles = Tiles;

@@ -49,22 +49,96 @@
                 // Load and draw data
                 this.scaleDOMNode();
                 Tiles.initTiles();
-                this.initBoard();
+                this.initBoard(this.context, this.getCellSize());
 
                 return this;
             },
             
-            initBoard: function() {
+            initBoard: function(drawingContext, cellSize) {
                 this.cleanBoard();
                 var sideBottom = (this._playerSide == ChessEnums.Turn.TURN_BLACK ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN);
-                for (var i = 0; i < 8; i++) {
-                    var tile = new Image(),
-                        ctx = this;
-                    $(tile).load(function() {
-                        ctx.context.drawImage(tile, ctx.getCellSize() * i, ctx.getCellSize())
-                    });
-					tile.src = Tiles.getTile(sideBottom);
-				}
+                
+                // Pawns
+                {
+                    for (var i = 0; i < 8; i++) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom);
+                        drawingContext.drawImage(tile, cellSize * i, cellSize);
+                    }
+                    
+                    for (var i = 0; i < 8; i++) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom + Tiles.COLOR_TILE_OFFSET);
+                        drawingContext.drawImage(tile, cellSize * i, cellSize * 6);
+                    }
+                }
+                
+                // Rooks
+                {
+                    for (var i = 0; i < 8; i += 7) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom - 1 + Tiles.COLOR_TILE_OFFSET);
+                        drawingContext.drawImage(tile, cellSize * i, cellSize * 7);
+                    }
+
+                    for (var i = 0; i < 8; i += 7) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom - 1);
+                        drawingContext.drawImage(tile, cellSize * i, 0);
+                    }
+                }
+                
+                // Knights
+                {
+                    for (var i = 1; i < 7; i += 5) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom - 3 + Tiles.COLOR_TILE_OFFSET);
+                        drawingContext.drawImage(tile, cellSize * i, cellSize * 7);
+                    }
+
+                    for (var i = 1; i < 7; i += 5) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom - 3);
+                        drawingContext.drawImage(tile, cellSize * i, 0);
+                    }
+                }
+    			
+				// Bishops
+				{
+                    for (var i = 2; i < 6; i += 3) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom - 2 + Tiles.COLOR_TILE_OFFSET);
+                        drawingContext.drawImage(tile, cellSize * i, cellSize * 7);
+                    }
+
+                    for (var i = 2; i < 6; i += 3) {
+                        var tile = new Image();
+                        tile.src = Tiles.getTile(sideBottom - 2);
+                        drawingContext.drawImage(tile, cellSize * i, 0);
+                    }
+                }
+				
+				// Queens
+				{
+					var tile = new Image();
+					tile.src = Tiles.getTile(sideBottom - 4 + Tiles.COLOR_TILE_OFFSET);
+					drawingContext.drawImage(tile, cellSize * 3, cellSize * 7);
+
+					var tile = new Image();
+					tile.src = Tiles.getTile(sideBottom - 4);
+					drawingContext.drawImage(tile, cellSize * 3, 0);
+                }
+				
+				// Kings
+				{
+					var tile = new Image();
+					tile.src = Tiles.getTile(sideBottom - 5 + Tiles.COLOR_TILE_OFFSET);
+					drawingContext.drawImage(tile, cellSize * 4, cellSize * 7);
+
+					var tile = new Image();
+					tile.src = Tiles.getTile(sideBottom - 5);
+					drawingContext.drawImage(tile, cellSize * 4, 0);
+                }
             },
 
             getCellSize: function() { return this.cellSize; },
