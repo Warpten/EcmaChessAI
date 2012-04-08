@@ -11,6 +11,8 @@
         
             var currentPiece = this._board[this._originCoords[1]][this._originCoords[0]];
             var destCell = this._board[this._destCoords[1]][this._destCoords[0]];
+            
+            console.log('Trying to move ' + currentPiece.toString());
 
             // Disallow move if the targeted cell contains a piece of our side.
             if (destCell !== null)
@@ -19,21 +21,19 @@
             
             if (currentPiece.getTypeMask() & ChessEnums.Piece.ROOK) { // Rook handler
                 // Disallow moves on anything else than rows and columns
-                if (Math.abs(this._originCoords[0] - this.destCoords[0]) != 0
-                    && Math.abs(this._originCoords[1] - this.destCoords[1]) != 0)
+                if (Math.abs(this._originCoords[0] - this._destCoords[0]) != 0
+                    && Math.abs(this._originCoords[1] - this._destCoords[1]) != 0)
                     return false;
                 
-                if (Math.abs(this._originCoords[0] - this.destCoords[0]) == 0) { // x offset = 0
-                    var icr = (this._originCoords[1] > this.destCoords[1]) ? 1 : -1;
-                    for (var i = this.destCoords[1]; i < this._originCoords[1]; i += icr)
-                        if (this._board[i][this._originCoords[0]] !== null)
-                            return false;
-                }
-                else if (Math.abs(this._originCoords[1] - this.destCoords[1]) == 0) { // y offset = 0
-                    var icr = (this._originCoords[0] > this.destCoords[0]) ? 1 : -1;
-                    for (var i = this.destCoords[0]; i < this._originCoords[0]; i += icr)
-                            if (this._board[this._originCoords[1]][i] !== null)
+                for (var fItr = 0; fItr <= 1; fItr++) {
+                    if (Math.abs(this._originCoords[fItr] - this._destCoords[fItr]) == 0) {
+                        var sItr = (fItr == 0) ? 1 : 0,
+                            increment = (this._originCoords[sItr] > this._destCoords[sItr]) ? 1 : -1;
+
+                        for (var i = this._destCoords[sItr]; i < this._originCoords[sItr]; i += increment)
+                            if (this._board[i][this._originCoords[fItr]] !== null)
                                 return false;
+                    }
                 }
                 
                 return true;
