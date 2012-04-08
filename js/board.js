@@ -61,89 +61,43 @@
             
             initBoard: function(drawingContext, cellSize) {
                 this.cleanBoard();
-                var sideBottom = (this._playerSide == ChessEnums.Turn.TURN_BLACK ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN);
                 
-                // Pawns
-                {
-                    for (var i = 0; i < 8; i++) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom);
-                        drawingContext.drawImage(tile, cellSize * i, cellSize);
-                    }
-                    
-                    for (var i = 0; i < 8; i++) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom + Tiles.COLOR_TILE_OFFSET);
-                        drawingContext.drawImage(tile, cellSize * i, cellSize * 6);
-                    }
-                }
-                
-                // Rooks
-                {
-                    for (var i = 0; i < 8; i += 7) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom - 1 + Tiles.COLOR_TILE_OFFSET);
-                        drawingContext.drawImage(tile, cellSize * i, cellSize * 7);
-                    }
+                var tileID = this._playerSide == ChessEnums.Turn.TURN_WHITE ? Tiles.TILE_WHITE_KING : Tiles.TILE_BLACK_KING;
+                var initPosition = function(cellSize, coords, ref) {
+                    var tile = new Image();
+                    tile.src = Tiles.getTile(tileID);
+                    ref.context.drawImage(tile, cellSize * coords[0], cellSize * (7 - coords[1]), cellSize, cellSize);
+                    var secondTile = new Image();
+                    secondTile.src = Tiles.getTile(tileID - 6 * ref._playerSide);
+                    ref.context.drawImage(secondTile, cellSize * coords[0], cellSize * coords[1], cellSize, cellSize);
+                };
 
-                    for (var i = 0; i < 8; i += 7) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom - 1);
-                        drawingContext.drawImage(tile, cellSize * i, 0);
-                    }
-                }
-                
-                // Knights
-                {
-                    for (var i = 1; i < 7; i += 5) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom - 3 + Tiles.COLOR_TILE_OFFSET);
-                        drawingContext.drawImage(tile, cellSize * i, cellSize * 7);
-                    }
+                // Kings
+                initPosition(this.getCellSize(), [4, 0], this);
 
-                    for (var i = 1; i < 7; i += 5) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom - 3);
-                        drawingContext.drawImage(tile, cellSize * i, 0);
-                    }
-                }
+                // Queen
+                ++tileID;
+                initPosition(this.getCellSize(), [3, 0], this);
                 
                 // Bishops
-                {
-                    for (var i = 2; i < 6; i += 3) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom - 2 + Tiles.COLOR_TILE_OFFSET);
-                        drawingContext.drawImage(tile, cellSize * i, cellSize * 7);
-                    }
-
-                    for (var i = 2; i < 6; i += 3) {
-                        var tile = new Image();
-                        tile.src = Tiles.getTile(sideBottom - 2);
-                        drawingContext.drawImage(tile, cellSize * i, 0);
-                    }
-                }
+                ++tileID;
+                initPosition(this.getCellSize(), [2, 0], this);
+                initPosition(this.getCellSize(), [5, 0], this);
                 
-                // Queens
-                {
-                    var tile = new Image();
-                    tile.src = Tiles.getTile(sideBottom - 4 + Tiles.COLOR_TILE_OFFSET);
-                    drawingContext.drawImage(tile, cellSize * 3, cellSize * 7);
-
-                    var tile = new Image();
-                    tile.src = Tiles.getTile(sideBottom - 4);
-                    drawingContext.drawImage(tile, cellSize * 3, 0);
-                }
+                // Knights
+                ++tileID;
+                initPosition(this.getCellSize(), [1, 0], this);
+                initPosition(this.getCellSize(), [6, 0], this);
                 
-                // Kings
-                {
-                    var tile = new Image();
-                    tile.src = Tiles.getTile(sideBottom - 5 + Tiles.COLOR_TILE_OFFSET);
-                    drawingContext.drawImage(tile, cellSize * 4, cellSize * 7);
-
-                    var tile = new Image();
-                    tile.src = Tiles.getTile(sideBottom - 5);
-                    drawingContext.drawImage(tile, cellSize * 4, 0);
-                }
+                // Rooks
+                ++tileID;
+                initPosition(this.getCellSize(), [0, 0], this);
+                initPosition(this.getCellSize(), [7, 0], this);
+                
+                // Pawns
+                ++tileID;
+                for (var i = 0; i < 8; i++)
+                    initPosition(this.getCellSize(), [i, 1], this);
             },
 
             getCellSize: function() { return this.cellSize; },
@@ -222,3 +176,4 @@
     // Expose chessBoard to the global scope
     window.chessBoard = chessBoard;
 })(window);
+
