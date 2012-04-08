@@ -18,15 +18,15 @@
             // Defines the size of a cell, can be scaled up or down.
             cellSize: 60,
 
-            //! Bitboard containing pieces. Each field will have an instance of
-            //! the piece-related class and a flag describing the piece (faster
-            //! than instanceof calls).
+            // Bitboard containing pieces. Each field will have an instance of
+            // the piece-related class and a flag describing the piece (faster
+            // than instanceof calls).
             _bitBoard: [[], [], [], [], [], [], [], []],
 
-            //! Whose turn is it to play
+            // Whose turn is it to play
             _whoseTurnIsIt: ChessEnums.Turn.TURN_WHITE,
 
-            //! Side chosen by the player - White per default
+            // Side chosen by the player - White per default
             _playerSide: ChessEnums.Turn.TURN_WHITE,
             
             // Controls castling allowing
@@ -51,25 +51,37 @@
                 return this;
             },
             
+            /*
+             * @description Handles diagram rotation when the player chooses to switch sides.
+             *              Warning, resets the game to the starting position
+             */
             switchSide: function() {
-                this._playerSide *= ChessEnums.Turn.TURN_BLACK;  
+                this._playerSide *= ChessEnums.Turn.TURN_BLACK;
                 this.initBoard(this.context, this.getCellSize());
-    			if (this._playerSide == ChessEnums.Turn.TURN_BLACK)
-					$(this.DOMelement).css('background-position', this.getCellSize() + 'px 0px');
-				else $(this.DOMelement).css('background-position', '0px 0px');
+                if (this._playerSide == ChessEnums.Turn.TURN_BLACK)
+                    $(this.domNode).css('background-position', this.getCellSize() + 'px 0px');
+                else $(this.domNode).css('background-position', '0px 0px');
             },
             
+            /*
+             * @description Fills the diagram's inital state
+             */
             initBoard: function(drawingContext, cellSize) {
                 this.cleanBoard();
                 
                 var tileID = this._playerSide == ChessEnums.Turn.TURN_WHITE ? Tiles.TILE_WHITE_KING : Tiles.TILE_BLACK_KING;
                 var initPosition = function(coords, ref) {
                     var tile = new Image();
+                    $(tile).load(function() {
+                        ref.context.drawImage(this, ref.getCellSize() * coords[0], ref.getCellSize() * (7 - coords[1]), ref.getCellSize(), ref.getCellSize());
+                    });
                     tile.src = Tiles.getTile(tileID);
-                    ref.context.drawImage(tile, ref.getCellSize() * coords[0], ref.getCellSize() * (7 - coords[1]), ref.getCellSize(), ref.getCellSize());
+                    
                     var secondTile = new Image();
+                    $(secondTile).load(function() {
+                        ref.context.drawImage(secondTile, ref.getCellSize() * coords[0], ref.getCellSize() * coords[1], ref.getCellSize(), ref.getCellSize());
+                    });
                     secondTile.src = Tiles.getTile(tileID - 6 * ref._playerSide);
-                    ref.context.drawImage(secondTile, ref.getCellSize() * coords[0], ref.getCellSize() * coords[1], ref.getCellSize(), ref.getCellSize());
                 };
 
                 // Kings
@@ -132,6 +144,7 @@
 
             /*
              * @description Draws tiles after a complete context erasing
+             * @about       Non-implemented yet
              */
             drawTiles: function() {
                 this.cleanBoard();
@@ -154,7 +167,7 @@
             canPlayerMove: function() { return this._whoseTurnIsIt == this._playerSide; },
 
             /*
-             * @description Switches turn state
+             * @description Switches turn state to determine if the player can move.
              */
             toggleTurn: function() { this._whoseTurnIsIt *= ChessEnums.Turn.TURN_BLACK; },
 
