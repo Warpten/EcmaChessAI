@@ -1,6 +1,7 @@
 (function () {
     var chessBoard = (function() {
         var chessBoard = function(DOMElement) {
+            DOMElement.width = DOMElement.height = chessBoard.fn.getCellSize() * 8;
             // Append click handler
             $(DOMElement).click(function(eventData) {
                 chessBoard.fn.onClick(eventData);
@@ -13,9 +14,6 @@
             // DOM node
             domNode: null,
             context: null,
-		
-            // Contains all imageData associated to all tiles
-            imageDataTiles: [],
 
             // Defines the size of a cell, can be scaled up or down.
             cellSize: 60,
@@ -50,16 +48,16 @@
 
                 // Load and draw data
                 this.scaleDOMNode();
-                this.loadTiles();
+                Tiles.initTiles();
                 this.initBoard();
 
                 return this;
             },
             
             initBoard: function() {
-                alert(this.getCellSize());
                 for (var i = 0; i < 8; i++) {
-					var tile = this.imageDataTiles[this._playerSide == ChessEnums.Turn.TURN_WHITE ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN];
+                    var tile = new Image();
+					tile.src = Tiles.getTile(this._playerSide == ChessEnums.Turn.TURN_BLACK ? Tiles.TILE_WHITE_PAWN : Tiles.TILE_BLACK_PAWN);
 					this.context.drawImage(tile, this.getCellSize() * i, this.getCellSize());
 				}
             },
@@ -78,23 +76,6 @@
                     'background-image': 'url(./imgs/boardbg.png)',
                     'background-size': '100%'
                 });
-            },
-
-            /*
-             * @description Loads imageData instances from tiles into the board
-             */
-            loadTiles: function() {
-                if (this._tilesReady)
-                    return;
-
-                Tiles.initTiles();
-                for (var i = 0; i < Tiles.MAX_TILE_NUMBER; i++) {
-                    var tileImg = new Image();
-                    tileImg.src = Tiles.getTile(i);
-                    this.imageDataTiles[i] = tileImg;
-                }
-                
-                this._tilesReady = true;
             },
 
             /*
