@@ -13,8 +13,8 @@
                 yf = this._destCoords[1],
                 xi = this._originCoords[0],
                 yi = this._originCoords[1];
-                currentCell  = this._board[yi][xi],
-                destCell     = this._board[yf][xf];
+                currentCell  = this._board.getPieceAt(xi, yi),
+                destCell     = this._board.getPieceAt(xf, yf);
                 
             if (xf == xi && yf == yi)
                 return false;
@@ -60,7 +60,9 @@
                 return false;
             }
             else if (currentCell.getTypeMask() & ChessEnums.Piece.KING) {
-                // King handler
+                if (Math.abs(xf - xi) > 1 || Math.abs(yf - yi) > 1)
+                    return false;
+                return true;
             }
             else if (currentCell.getTypeMask() & ChessEnums.Piece.PAWN) {
                 // Pawn handler
@@ -83,13 +85,13 @@
                 if (yi > yf) { // moving up
                     for (var x = xi; x < xf; ++x)
                         for (var y = yf; y < yi; ++y)
-                            if (this._board[y][x] !== null)
+                            if (this._board.hasPieceAt(x, y))
                                 return false;
                 }
                 else { // if (yi < yf) { // moving down
                     for (var x = xi; x < xf; ++x)
                         for (var y = yi; y < yf; ++y)
-                            if (this._board[y][x] !== null)
+                            if (this._board.hasPieceAt(x, y))
                                 return false;
                 }
                 return true;
@@ -98,13 +100,13 @@
                 if (yi > yf) { // moving up
                     for (var x = xf; x < xi; ++x)
                         for (var y = yf; y < yi; ++y)
-                            if (this._board[y][x] !== null)
+                            if (this._board.hasPieceAt(x, y))
                                 return false;
                 }
                 else { // if (yi < yf) { // moving down
                     for (var x = xf; x < xi; ++x)
                         for (var y = yi; y < yf; ++y)
-                            if (this._board[y][x] !== null)
+                            if (this._board.hasPieceAt(x, y))
                                 return false;
                 }
                 return true;
@@ -116,12 +118,12 @@
             if (xf == xi) { // moving on y
                 if (yf > yi) { // moving down
                     for (var y = yi; y < yf; ++y)
-                        if (this._board[y][xi] !== null)
+                        if (this._board.hasPieceAt(x, y))
                             return false;
                 }
                 else { // if (yf < yi) // moving up
                     for (var y = yf; y < yi; ++y)
-                        if (this._board[y][xi] !== null)
+                        if (this._board.hasPieceAt(x, y))
                             return false;
                 }
                 return true;
@@ -129,12 +131,12 @@
             else { // if (yf == yi) // moving on x
                 if (xf > xi) { // moving right
                     for (var x = xi; x < xf; ++x)
-                        if (this._board[yi][x] !== null)
+                        if (this._board.hasPieceAt(x, y))
                             return false;
                 }
                 else { // if (xf < xi) // moving left
                     for (var x = xf; x < xi; ++x)
-                        if (this._board[yi][x] !== null)
+                        if (this._board.hasPieceAt(x, y))
                             return false;
                 }
                 return true;

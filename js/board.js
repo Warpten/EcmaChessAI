@@ -24,7 +24,7 @@
             // Bitboard containing pieces. Each field will have an instance of
             // the piece-related class and a flag describing the piece (faster
             // than instanceof calls).
-            _bitBoard: [[], [], [], [], [], [], [], []],
+            _bitBoard: new bitBoard(),
 
             // Whose turn is it to play
             _whoseTurnIsIt: ChessEnums.Turn.TURN_WHITE,
@@ -83,17 +83,15 @@
                     });
                     tile.src = Tiles.getTile(tileID);
                     
-                    //            y         x
-                    ref._bitBoard[7 - coords[1]][coords[0]] = new Piece(coords, tileID);
+                    ref._bitBoard.setPieceAt(coords[0], 7 - coords[1], new Piece(coords, tileID));
                     
                     var secondTile = new Image();
                     $(secondTile).load(function() {
                         ref.context.drawImage(secondTile, ref.getCellSize() * coords[0], ref.getCellSize() * coords[1], ref.getCellSize(), ref.getCellSize());
                     });
                     secondTile.src = Tiles.getTile(tileID - 6 * ref._playerSide);
-                    
-                    //            y         x
-                    ref._bitBoard[coords[1]][coords[0]] = new Piece(coords, tileID - 6 * ref._playerSide);
+
+                    ref._bitBoard.setPieceAt(coords[0], coords[1], new Piece(coords, tileID - 6 * ref._playerSide))
                 };
 
                 // Kings
@@ -122,18 +120,6 @@
                 ++tileID;
                 for (var i = 0; i < 8; i++)
                     initPosition([i, 1], this);
-                    
-                this.fillNulls();
-            },
-            
-            /*
-             * @description Fills e,pty cells of the board with null objects
-             */
-            fillNulls: function() {
-                for (var i = 0; i < 8; i++)
-                    for (var j = 0; j < 8; j++)
-                        if (!(this._bitBoard[i][j] instanceof Piece))
-                            this._bitBoard[i][j] = null;
             },
 
             getCellSize: function() { return this.cellSize; },
@@ -200,7 +186,8 @@
              * @description Switches turn state to determine if the player can move.
              */
             toggleTurn: function() { this._whoseTurnIsIt *= ChessEnums.Turn.TURN_BLACK; },
-
+            getAISide: function() { return this._playerSide * ChessEnums.Turn.TURN_BLACK; },
+            
             /*
              * @description Handles click interaction with the canvas
              */
@@ -226,17 +213,17 @@
                 }
                 else {
                     // Select the cell if it's not an empty one
-                    if (referer._bitBoard[clickCoords[1]][clickCoords[0]] !== null)
+                    if (referer._bitBoard.hasPieceAt(clickCoords[0], clickCoords[1]))
                         referer._pickedCell = clickCoords;
                 }
             },
             
             handleMove: function(from, to) {
-                this._bitBoard[to[1]][to[0]] = this._bitBoard[from[1]][from[0]];
-                this.drawTileToCell(this._bitBoard[from[1]][from[0]].getTileId(), to[0], to[1]);
+                this._bitBoard.moveFromTo(from[0], from[1], to[0], to[1]);
+                this.drawTileToCell(this._bitBoard.getPieceAt(to[0], to[1]).getTileId(), to[0], to[1]);
                 
                 this.eraseCell(from[0], from[1]);
-                this._bitBoard[from[1]][from[0]] = null;
+                this._bitBoard.rmPieceAt(from[0], from[1]);
             }
         };
 
