@@ -8,43 +8,92 @@
         isValid: function() {
             console.log('Origin is ' + this._originCoords);
             console.log('Dest is ' + this._destCoords);
-        
-            var currentPiece = this._board[this._originCoords[1]][this._originCoords[0]];
-            var destCell = this._board[this._destCoords[1]][this._destCoords[0]];
             
-            console.log('Trying to move ' + currentPiece.toString());
+            var xf = this._destCoords[0],
+                yf = this._destCoords[1],
+                xi = this._originCoords[0],
+                yi = this._originCoords[1];
+                currentCell  = this._board[yi][xi],
+                destCell     = this._board[yf][xf];
+                
+            if (xf == xi && yf == yi)
+                return false;
+            
+            console.log('Trying to move ' + currentCell.toString());
+            
+            // TODO: disallow if king is in check
+            // TODO: disallow if originPiece is pinned on the king
 
             // Disallow move if the targeted cell contains a piece of our side.
             if (destCell !== null)
-                if ((currentPiece.isBlack()) == (destCell.isBlack()))
+                if ((currentCell.isBlack()) == (destCell.isBlack()))
                     return false;
             
-            if (currentPiece.getTypeMask() & ChessEnums.Piece.ROOK) {
+            if (currentCell.getTypeMask() & ChessEnums.Piece.ROOK) {
                 // Disallow moves on anything else than rows and columns
-                if (Math.abs(this._originCoords[0] - this._destCoords[0]) != 0
-                    && Math.abs(this._originCoords[1] - this._destCoords[1]) != 0)
+                if (Math.abs(xi - xf) != 0
+                    && Math.abs(yi - yf) != 0)
                     return false;
                 
                 return true;
-            } else if (currentPiece[0] & ChessEnums.Piece.BISHOP) {
+            }
+            else if (currentCell[0] & ChessEnums.Piece.BISHOP) {
                 // Disallow moves in anything else than diagonals
-                if (Math.abs(this._originCoords[0] - this._destCoords[0]) != Math.abs(this._originCoords[1] - this._destCoords[1]))
+                if (Math.abs(xi - xf) != Math.abs(yi - yf))
                     return false;
+                    
+                if (xf > xi) { // moving right
+                    if (yi > yf) { // moving up
+                        for (var x = xi; x < xf; ++x)
+                            for (var y = yf; y < yi; ++y)
+                                if (this._board[y][x] !== null)
+                                    return false;
+                        return true;
+                    }
+                    else { // if (yi < yf) { // moving up
+                        for (var x = xi; x < xf; ++x)
+                            for (var y = yi; y < yf; ++y)
+                                if (this._board[y][x] !== null)
+                                    return false;
+                        return true;
+                    }
+                }
+                else { // if (xi > xf) { moving left
+                    if (yi > yf) { // moving up
+                        for (var x = xf; x < xi; ++x)
+                            for (var y = yf; y < yi; ++y)
+                                if (this._board[y][x] !== null)
+                                    return false;
+                        return true;
+                    }
+                    else { // if (yi < yf) { // moving up
+                        for (var x = xf; x < xi; ++x)
+                            for (var y = yi; y < yf; ++y)
+                                if (this._board[y][x] !== null)
+                                    return false;
+                        return true;
+                    }
+                }
                 return true;
-            } else if (currentPiece[0] & ChessEnums.Piece.KNIGHT) {
-                if ((Math.abs(this._originCoords[0] - this._destCoords[0]) == 2 &&
-                     Math.abs(this._originCoords[1] - this._destCoords[1]) == 1) ||
-                    (Math.abs(this._originCoords[0] - this._destCoords[0]) == 1 &&
-                     Math.abs(this._originCoords[1] - this._destCoords[1]) == 2))
+            }
+            else if (currentCell[0] & ChessEnums.Piece.KNIGHT) {
+                if ((Math.abs(xi - xf) == 2 &&
+                     Math.abs(yi - yf) == 1) ||
+                    (Math.abs(xi - xf) == 1 &&
+                     Math.abs(yi - yf) == 2))
                     return true;
                 return false;
-            } else if (currentPiece[0] & ChessEnums.Piece.QUEEN) {
+            }
+            else if (currentCell[0] & ChessEnums.Piece.QUEEN) {
                 // Queen handler
-            } else if (currentPiece[0] & ChessEnums.Piece.KING) {
+            }
+            else if (currentCell[0] & ChessEnums.Piece.KING) {
                 // King handler
-            } else if (currentPiece[0] & ChessEnums.Piece.PAWN) {
+            }
+            else if (currentCell[0] & ChessEnums.Piece.PAWN) {
                 // Pawn handler
-            } else
+            }
+            else
                 return false;
         },
         
