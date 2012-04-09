@@ -53,8 +53,8 @@
                 if (Math.abs(xf - xi) == Math.abs(yf - yi)) { // Moving on diagonals, bishop check
                     return this.checkBishop(xi, xf, yi, yf);
                 }
-                else if ((Math.abs(xf - xi) == 0 && Math.abs(yf - yi) <> 0) ||
-                         (Math.abs(xf - xi) <> 0 && Math.abs(yf - yi) == 0)) {
+                else if ((Math.abs(xf - xi) == 0 && Math.abs(yf - yi) != 0) ||
+                         (Math.abs(xf - xi) != 0 && Math.abs(yf - yi) == 0)) {
                     return this.checkRook(xi, xf, yi, yf);
                 }
                 return false;
