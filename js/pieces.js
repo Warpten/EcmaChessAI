@@ -18,7 +18,7 @@
                     break;
                 case Tiles.TILE_BLACK_KNIGHT:
                 case Tiles.TILE_WHITE_KNIGHT:
-                    typeMask |= ChessEnums.Piece.KNIGTH;
+                    typeMask |= ChessEnums.Piece.KNIGHT;
                     break;
                 case Tiles.TILE_BLACK_BISHOP:
                 case Tiles.TILE_WHITE_BISHOP:
