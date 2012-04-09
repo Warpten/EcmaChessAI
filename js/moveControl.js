@@ -118,12 +118,12 @@
             if (xf == xi) { // moving on y
                 if (yf > yi) { // moving down
                     for (var y = yi; y < yf; ++y)
-                        if (this._board.hasPieceAt(x, y))
+                        if (this._board.hasPieceAt(xf, y))
                             return false;
                 }
                 else { // if (yf < yi) // moving up
                     for (var y = yf; y < yi; ++y)
-                        if (this._board.hasPieceAt(x, y))
+                        if (this._board.hasPieceAt(xf, y))
                             return false;
                 }
                 return true;
@@ -131,12 +131,12 @@
             else { // if (yf == yi) // moving on x
                 if (xf > xi) { // moving right
                     for (var x = xi; x < xf; ++x)
-                        if (this._board.hasPieceAt(x, y))
+                        if (this._board.hasPieceAt(x, yi))
                             return false;
                 }
                 else { // if (xf < xi) // moving left
                     for (var x = xf; x < xi; ++x)
-                        if (this._board.hasPieceAt(x, y))
+                        if (this._board.hasPieceAt(x, yi))
                             return false;
                 }
                 return true;
