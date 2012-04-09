@@ -50,7 +50,7 @@
                 return false;
             }
             else if (currentCell[0] & ChessEnums.Piece.QUEEN) {
-                if (Math.abs(xf - xi) == Math.abs(yf - yi) { // Moving on diagonals, bishop check
+                if (Math.abs(xf - xi) == Math.abs(yf - yi)) { // Moving on diagonals, bishop check
                     return this.checkBishop(xi, xf, yi, yf);
                 }
                 else if ((Math.abs(xf - xi) == 0 && Math.abs(yf - yi) <> 0) ||
