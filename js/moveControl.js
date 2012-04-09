@@ -19,28 +19,25 @@
                 if ((currentPiece.isBlack()) == (destCell.isBlack()))
                     return false;
             
-            if (currentPiece.getTypeMask() & ChessEnums.Piece.ROOK) { // Rook handler
+            if (currentPiece.getTypeMask() & ChessEnums.Piece.ROOK) {
                 // Disallow moves on anything else than rows and columns
                 if (Math.abs(this._originCoords[0] - this._destCoords[0]) != 0
                     && Math.abs(this._originCoords[1] - this._destCoords[1]) != 0)
                     return false;
                 
-                for (var fItr = 0; fItr <= 1; fItr++) {
-                    if (Math.abs(this._originCoords[fItr] - this._destCoords[fItr]) == 0) {
-                        var sItr = (fItr == 0) ? 1 : 0,
-                            increment = (this._originCoords[sItr] > this._destCoords[sItr]) ? 1 : -1;
-
-                        for (var i = this._destCoords[sItr]; i < this._originCoords[sItr]; i += increment)
-                            if (this._board[i][this._originCoords[fItr]] !== null)
-                                return false;
-                    }
-                }
-                
                 return true;
             } else if (currentPiece[0] & ChessEnums.Piece.BISHOP) {
-                // Bishop handler
+                // Disallow moves in anything else than diagonals
+                if (Math.abs(this._originCoords[0] - this._destCoords[0]) != Math.abs(this._originCoords[1] - this._destCoords[1]))
+                    return false;
+                return true;
             } else if (currentPiece[0] & ChessEnums.Piece.KNIGHT) {
-                // Knight handler
+                if ((Math.abs(this._originCoords[0] - this._destCoords[0]) == 2 &&
+                     Math.abs(this._originCoords[1] - this._destCoords[1]) == 1) ||
+                    (Math.abs(this._originCoords[0] - this._destCoords[0]) == 1 &&
+                     Math.abs(this._originCoords[1] - this._destCoords[1]) == 2))
+                    return true;
+                return false;
             } else if (currentPiece[0] & ChessEnums.Piece.QUEEN) {
                 // Queen handler
             } else if (currentPiece[0] & ChessEnums.Piece.KING) {
