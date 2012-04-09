@@ -35,13 +35,13 @@
                     return false;
                 return this.checkRook(xi, xf, yi, yf);
             }
-            else if (currentCell[0] & ChessEnums.Piece.BISHOP) {
+            else if (currentCell.getTypeMask() & ChessEnums.Piece.BISHOP) {
                 // Disallow moves in anything else than diagonals
                 if (Math.abs(xi - xf) != Math.abs(yi - yf))
                     return false;
                 return this.checkBishop(xi, xf, yi, yf);
             }
-            else if (currentCell[0] & ChessEnums.Piece.KNIGHT) {
+            else if (currentCell.getTypeMask() & ChessEnums.Piece.KNIGHT) {
                 if ((Math.abs(xi - xf) == 2 &&
                      Math.abs(yi - yf) == 1) ||
                     (Math.abs(xi - xf) == 1 &&
@@ -49,7 +49,7 @@
                     return true;
                 return false;
             }
-            else if (currentCell[0] & ChessEnums.Piece.QUEEN) {
+            else if (currentCell.getTypeMask() & ChessEnums.Piece.QUEEN) {
                 if (Math.abs(xf - xi) == Math.abs(yf - yi)) { // Moving on diagonals, bishop check
                     return this.checkBishop(xi, xf, yi, yf);
                 }
@@ -59,10 +59,10 @@
                 }
                 return false;
             }
-            else if (currentCell[0] & ChessEnums.Piece.KING) {
+            else if (currentCell.getTypeMask() & ChessEnums.Piece.KING) {
                 // King handler
             }
-            else if (currentCell[0] & ChessEnums.Piece.PAWN) {
+            else if (currentCell.getTypeMask() & ChessEnums.Piece.PAWN) {
                 // Pawn handler
             }
             else
