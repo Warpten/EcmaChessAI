@@ -8,7 +8,7 @@
         Piece: {
             KING:   0x001,
             QUEEN:  0x002,
-            KNIGTH: 0x004,
+            KNIGHT: 0x004,
             BISHOP: 0x008,
             ROOK:   0x010,
             PAWN:   0x020,

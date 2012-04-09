@@ -33,7 +33,7 @@
                     typeMask |= ChessEnums.Piece.PAWN;
                     break;
             }
-            return new Piece.fn.init(coords, typeMask);
+            return new Piece.fn.init(coords, typeMask, tileID);
         };
 
         Piece.fn = Piece.prototype = {
@@ -42,6 +42,9 @@
             
             // Cell coordinates on the board [x, y]
             coords: [-1, -1],
+            
+            // tileID
+            tileID: -1,
         
             constructor: Piece,
 
@@ -50,15 +53,17 @@
              * @returns     Instance of the object, or false if an invalid
              *              DOM element has been passed as a parameter.
              */
-            init: function(coords, typeMask) {
+            init: function(coords, typeMask, tileID) {
                 this.typeMask = typeMask;
                 this.coords = coords;
+                this.tileID = tileID;
                 return this;
             },
             
             isBlack: function() { return this.typeMask & ChessEnums.Piece.BLACK; },
             isWhite: function() { return this.typeMask & ChessEnums.Piece.WHITE; },
             getTypeMask: function() { return this.typeMask; },
+            getTileId: function() { return this.tileID; },
             toString: function() {
                 if (this.typeMask & ChessEnums.Piece.ROOK)
                     return (this.isBlack() ? 'Black' : 'White') + ' Tower';

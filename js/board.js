@@ -163,7 +163,7 @@
              * @description Erase a cell [x, y]
              */
             eraseCell: function(x, y) {
-                this.context.clearRect(x, y, x + this.getCellSize(), y + this.getCellSize());
+                this.context.clearRect(x * this.getCellSize(), y * this.getCellSize(), this.getCellSize(), this.getCellSize());
             },
 
             /*
@@ -182,7 +182,13 @@
                     return;
 
                 this.eraseCell(x, y);
-                this.context.putImageData(this.imageDataTiles[tileId], x * this.getCellSize(), y * this.getCellSize());
+                
+                var imageTile = new Image(),
+                    referer = this;
+                $(imageTile).load(function() {
+                    referer.context.drawImage(this, x * referer.getCellSize(), y * referer.getCellSize(), referer.getCellSize(), referer.getCellSize());
+                });
+                imageTile.src = Tiles.getTile(tileId);
             },
 
             /*
@@ -210,6 +216,8 @@
                     // A cell has been previously picked - Check the move
                     if (moveController.init(pickedCell, clickCoords, referer._bitBoard).isValid()) {
                         console.log('Valid move');
+                        referer.handleMove(pickedCell, clickCoords);
+                        referer._pickedCell = null;
                     }
                     else {
                         console.log('Invalid move, resetting the origin square.');
@@ -222,6 +230,14 @@
                         referer._pickedCell = clickCoords;
                 }
             },
+            
+            handleMove: function(from, to) {
+                this._bitBoard[to[1]][to[0]] = this._bitBoard[from[1]][from[0]];
+                this.drawTileToCell(this._bitBoard[from[1]][from[0]].getTileId(), to[0], to[1]);
+                
+                this.eraseCell(from[0], from[1]);
+                this._bitBoard[from[1]][from[0]] = null;
+            }
         };
 
         return chessBoard;
