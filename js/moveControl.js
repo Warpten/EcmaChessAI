@@ -31,11 +31,9 @@
             
             if (currentCell.getTypeMask() & ChessEnums.Piece.ROOK) {
                 // Disallow moves on anything else than rows and columns
-                if (Math.abs(xi - xf) != 0
-                    && Math.abs(yi - yf) != 0)
+                if (Math.abs(xi - xf) != 0 && Math.abs(yi - yf) != 0)
                     return false;
-                
-                return true;
+                return this.checkRook(xi, xf, yi, yf);
             }
             else if (currentCell[0] & ChessEnums.Piece.BISHOP) {
                 // Disallow moves in anything else than diagonals
@@ -59,7 +57,7 @@
                          (Math.abs(xf - xi) <> 0 && Math.abs(yf - yi) == 0)) {
                     return this.checkRook(xi, xf, yi, yf);
                 }
-                return falsem
+                return false;
             }
             else if (currentCell[0] & ChessEnums.Piece.KING) {
                 // King handler
@@ -87,15 +85,14 @@
                         for (var y = yf; y < yi; ++y)
                             if (this._board[y][x] !== null)
                                 return false;
-                    return true;
                 }
                 else { // if (yi < yf) { // moving down
                     for (var x = xi; x < xf; ++x)
                         for (var y = yi; y < yf; ++y)
                             if (this._board[y][x] !== null)
                                 return false;
-                    return true;
                 }
+                return true;
             }
             else { // if (xi > xf) { moving left
                 if (yi > yf) { // moving up
@@ -103,21 +100,46 @@
                         for (var y = yf; y < yi; ++y)
                             if (this._board[y][x] !== null)
                                 return false;
-                    return true;
                 }
                 else { // if (yi < yf) { // moving down
                     for (var x = xf; x < xi; ++x)
                         for (var y = yi; y < yf; ++y)
                             if (this._board[y][x] !== null)
                                 return false;
-                    return true;
                 }
+                return true;
             }
             return false;
         },
         
         checkRook: function(xi, xf, yi, yf) {
-            return true;
+            if (xf == xi) { // moving on y
+                if (yf > yi) { // moving down
+                    for (var y = yi; y < yf; ++y)
+                        if (this._board[y][xi] !== null)
+                            return false;
+                }
+                else { // if (yf < yi) // moving up
+                    for (var y = yf; y < yi; ++y)
+                        if (this._board[y][xi] !== null)
+                            return false;
+                }
+                return true;
+            }
+            else { // if (yf == yi) // moving on x
+                if (xf > xi) { // moving right
+                    for (var x = xi; x < xf; ++x)
+                        if (this._board[yi][x] !== null)
+                            return false;
+                }
+                else { // if (xf < xi) // moving left
+                    for (var x = xf; x < xi; ++x)
+                        if (this._board[yi][x] !== null)
+                            return false;
+                }
+                return true;
+            }
+            return false;
         },
     };
 
