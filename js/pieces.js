@@ -61,9 +61,18 @@
             getTypeMask: function() { return this.typeMask; },
             toString: function() {
                 if (this.typeMask & ChessEnums.Piece.ROOK)
-                    return 'Tower';
-                
-                return 'Error, typemask is ' + this.typeMask + ', piece is black : ' + this.isBlack();
+                    return (this.isBlack() ? 'Black' : 'White') + ' Tower';
+                if (this.typeMask & ChessEnums.Piece.QUEEN)
+                    return (this.isBlack() ? 'Black' : 'White') + ' Queen';
+                if (this.typeMask & ChessEnums.Piece.BISHOP)
+                    return (this.isBlack() ? 'Black' : 'White') + ' Bishop';
+                if (this.typeMask & ChessEnums.Piece.KING)
+                    return (this.isBlack() ? 'Black' : 'White') + ' King';
+                if (this.typeMask & ChessEnums.Piece.KNIGHT)
+                    return (this.isBlack() ? 'Black' : 'White') + ' Knight';
+                if (this.typeMask & ChessEnums.Piece.PAWN)
+                    return (this.isBlack() ? 'Black' : 'White') + ' Pawn';                
+                return 'Error, typemask is ' + this.typeMask + ', piece is ' + (this.isBlack() ? 'black' : 'white');
             },
         };
 

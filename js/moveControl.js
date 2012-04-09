@@ -21,7 +21,7 @@
             
             console.log('Trying to move ' + currentCell.toString());
             
-            // TODO: disallow if king is in check
+            // TODO: check and disallow if king is in check and move doesnt help
             // TODO: disallow if originPiece is pinned on the king
 
             // Disallow move if the targeted cell contains a piece of our side.
@@ -41,40 +41,7 @@
                 // Disallow moves in anything else than diagonals
                 if (Math.abs(xi - xf) != Math.abs(yi - yf))
                     return false;
-                    
-                if (xf > xi) { // moving right
-                    if (yi > yf) { // moving up
-                        for (var x = xi; x < xf; ++x)
-                            for (var y = yf; y < yi; ++y)
-                                if (this._board[y][x] !== null)
-                                    return false;
-                        return true;
-                    }
-                    else { // if (yi < yf) { // moving up
-                        for (var x = xi; x < xf; ++x)
-                            for (var y = yi; y < yf; ++y)
-                                if (this._board[y][x] !== null)
-                                    return false;
-                        return true;
-                    }
-                }
-                else { // if (xi > xf) { moving left
-                    if (yi > yf) { // moving up
-                        for (var x = xf; x < xi; ++x)
-                            for (var y = yf; y < yi; ++y)
-                                if (this._board[y][x] !== null)
-                                    return false;
-                        return true;
-                    }
-                    else { // if (yi < yf) { // moving up
-                        for (var x = xf; x < xi; ++x)
-                            for (var y = yi; y < yf; ++y)
-                                if (this._board[y][x] !== null)
-                                    return false;
-                        return true;
-                    }
-                }
-                return true;
+                return this.checkBishop(xi, xf, yi, yf);
             }
             else if (currentCell[0] & ChessEnums.Piece.KNIGHT) {
                 if ((Math.abs(xi - xf) == 2 &&
@@ -85,7 +52,14 @@
                 return false;
             }
             else if (currentCell[0] & ChessEnums.Piece.QUEEN) {
-                // Queen handler
+                if (Math.abs(xf - xi) == Math.abs(yf - yi) { // Moving on diagonals, bishop check
+                    return this.checkBishop(xi, xf, yi, yf);
+                }
+                else if ((Math.abs(xf - xi) == 0 && Math.abs(yf - yi) <> 0) ||
+                         (Math.abs(xf - xi) <> 0 && Math.abs(yf - yi) == 0)) {
+                    return this.checkRook(xi, xf, yi, yf);
+                }
+                return falsem
             }
             else if (currentCell[0] & ChessEnums.Piece.KING) {
                 // King handler
@@ -104,7 +78,47 @@
             this._maxRange = 1;
             
             return this;
-        }
+        },
+        
+        checkBishop: function(xi, xf, yi, yf) {
+            if (xf > xi) { // moving right
+                if (yi > yf) { // moving up
+                    for (var x = xi; x < xf; ++x)
+                        for (var y = yf; y < yi; ++y)
+                            if (this._board[y][x] !== null)
+                                return false;
+                    return true;
+                }
+                else { // if (yi < yf) { // moving down
+                    for (var x = xi; x < xf; ++x)
+                        for (var y = yi; y < yf; ++y)
+                            if (this._board[y][x] !== null)
+                                return false;
+                    return true;
+                }
+            }
+            else { // if (xi > xf) { moving left
+                if (yi > yf) { // moving up
+                    for (var x = xf; x < xi; ++x)
+                        for (var y = yf; y < yi; ++y)
+                            if (this._board[y][x] !== null)
+                                return false;
+                    return true;
+                }
+                else { // if (yi < yf) { // moving down
+                    for (var x = xf; x < xi; ++x)
+                        for (var y = yi; y < yf; ++y)
+                            if (this._board[y][x] !== null)
+                                return false;
+                    return true;
+                }
+            }
+            return false;
+        },
+        
+        checkRook: function(xi, xf, yi, yf) {
+            return true;
+        },
     };
 
     window.moveController = moveController;
