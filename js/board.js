@@ -14,70 +14,84 @@
         ChessBoard.fn = ChessBoard.prototype = {
             constructor: ChessBoard,
 
-            // Controls castling -- wb ws bb bs
-            castleState: [true, true, true, true],
-
-            // Board
-            bitBoard: [[],[],[],[],[],[],[],[]],
-
-            // Debug
+            // Print debugging information to the browser's console.
             isVerbose: true,
 
-            // Coordinates of the first click
+            // Coordinates of the picked piece, if any
             referenceCoords: null,
+            getReferenceCoords: function() { return this.referenceCoords; },
+            setReferenceCoords: function(c) { this.referenceCoords = c; return this; },
 
+            // Renderer
+            renderer: null,
+            getRenderer: function() { return this.renderer; },
+
+            // Is the game over ?
+            gameEnded: false,
+            hasGameEnded: function() { return this.gameEnded; },
+            endGame: function() { this.gameEnded = true; },
+
+            // Who does the player control ?
             playerSide: ChessEnums.Piece.WHITE,
+            getPlayerSide: function() { return this.playerSide; },
 
+            currentTurn: ChessEnums.Piece.WHITE,
+            getCurrentTurn: function() { return this.currentTurn; },
+            toggleTurn: function () {
+                if (this.currentTurn & ChessEnums.Piece.WHITE)
+                    this.currentTurn = ChessEnums.Piece.BLACK;
+                else this.currentTurn = ChessEnums.Piece.WHITE;
+            },
+
+            /*
+             * @description Constructor
+             */
             init: function(dom) {
                 this.renderer = new ChessRenderer(dom);
-                this.log('ChessBoard object initialized!', true);
-                
+
                 this.initBoard();
+                this.log('ChessBoard object initialized and rendered!', true);
+
                 return this;
             },
 
-            log: function(str, ret) {
-                if (this.isVerbose)
-                    console.log(str);
-                return ret;
-            },
-
-            getPlayerSide: function() { return this.playerSide; },
+            /*
+             * @description Changes controlled sides and turns the diagram over
+             */
             switchSide: function() {
-                if (this.playerSide == ChessEnums.Piece.BLACK)
-                    this.playerSide = ChessEnums.Piece.WHITE;
-                else
-                    this.playerSide = ChessEnums.Piece.BLACK;
+                this.playerSide = (this.playerSide == ChessEnums.Piece.BLACK) ? ChessEnums.Piece.WHITE : ChessEnums.Piece.BLACK;
+
                 this.initBoard();
                 this.getRenderer().rotate();
             },
 
-            getRenderer: function() { return this.renderer; },
+            /*
+             * @description Overload of console.log, will log only if the object
+             *              is in verbose mode
+             */
+            log: function(str, ret) {
+                if (this.isVerbose)
+                    console.log('>> ' + str);
+                return ret !== null ? ret : true;
+            },
 
             /*
              * @description Used to bring the diagram back
              *              to its default layout.
              */
             initBoard: function() {
+                this.currentTurn = ChessEnums.Piece.WHITE;
                 for (var x = 0; x < 8; x++) {
                     for (var y = 0; y < 8; y++) {
                         this.bitBoard[y][x] = null;
+                        this.getRenderer().eraseTile(x, y);
 
-                        tileMask = 0;
-                        if (y > 3) {
-                            tileMask |= this.getPlayerSide();
-                        }
-                        else {
-                            tileMask |= (this.getPlayerSide() == ChessEnums.Piece.WHITE ? ChessEnums.Piece.BLACK : ChessEnums.Piece.WHITE);
-                        }
+                        tileMask = (this.getPlayerSide() == ChessEnums.Piece.WHITE ? ChessEnums.Piece.BLACK : ChessEnums.Piece.WHITE);;
+                        if (y > 3)
+                            tileMask = this.getPlayerSide();
 
-                        if (y == 1 || y == 6) {
+                        if (y == 1 || y == 6)
                             tileMask |= ChessEnums.Piece.PAWN;
-
-                            var pieceObj = new Piece(tileMask, x, y, (tileMask & this.getPlayerSide()));
-                            this.setPieceAt(x, y, pieceObj);
-                            this.getRenderer().drawTileAt(x, y, pieceObj.getTileName());
-                        }
                         else if (y == 0 || y == 7) {
                             switch (x) {
                                 case 0: case 7: tileMask |= ChessEnums.Piece.ROOK;   break;
@@ -86,20 +100,24 @@
                                 case 3:         tileMask |= ChessEnums.Piece.QUEEN;  break;
                                 case 4:         tileMask |= ChessEnums.Piece.KING;   break;
                             }
-                            var pieceObj = new Piece(tileMask, x, y, (tileMask & this.getPlayerSide()));
-                            this.setPieceAt(x, y, pieceObj);
-                            this.getRenderer().drawTileAt(x, y, pieceObj.getTileName());
                         }
+
+                        if (!(y == 1 || y == 6 || y == 0 || y == 7))
+                            continue;
+
+                        var pieceObj = new Piece(tileMask, x, y, (tileMask & this.getPlayerSide()));
+                        this.setPieceAt(x, y, pieceObj);
+                        this.getRenderer().drawTileAt(x, y, pieceObj.getTileName());
                     }
                 }
             },
 
             // BitBoard related functions
+            bitBoard: [[],[],[],[],[],[],[],[]],
             hasPieceAt: function(x, y) { return this.bitBoard[y][x] !== null; },
             getPieceAt: function(x, y) { return this.bitBoard[y][x]; },
             setPieceAt: function(x, y, pieceObj) { this.bitBoard[y][x] = pieceObj; },
             delPieceAt: function(x, y) { this.setPieceAt(x, y, null); },
-
             findPiece: function (typeMask) {
                 for (var x = 0; x < 8; x++)
                     for (var y = 0; y < 8; y++)
@@ -108,7 +126,7 @@
                                 return piece;
                 return null;
             },
-            
+
             isPieceBetween: function(xi, yi, xf, yf) {
                 if (Math.abs(xi - xf) == 1 || Math.abs(yi - yf) == 1)
                     return false;
@@ -120,7 +138,7 @@
                                 return true;
                     }
                     else { // Down
-                        for (var y = yi - 1; y < yf; y++)
+                        for (var y = yi + 1; y < yf; y++)
                             if (this.hasPieceAt(xi, y))
                                 return true;
                     }
@@ -138,8 +156,8 @@
                     }
                 }
                 else if (Math.abs(xi - xf) == Math.abs(yi - yf)) { // Diagonally
+                    var diff = Math.abs(xf - xi);
                     if (xi > xf) { // Left
-                        var diff = xi - xf;
                         if (yi > yf) { // Up
                             for (var i = 1; i < diff; i++)
                                 if (this.hasPieceAt(xi - i, yi - i))
@@ -152,7 +170,6 @@
                         }
                     }
                     else { // Right
-                        var diff = xf - xi;
                         if (yi > yf) { // Up
                             for (var i = 1; i < diff; i++)
                                 if (this.hasPieceAt(xi + i, yi - i))
@@ -169,142 +186,160 @@
             },
 
             getMapForSide: function(colour) {
-                if (colour != ChessEnums.Pieces.BLACK && colour != ChessEnums.Pieces.WHITE)
+                if (colour != ChessEnums.Piece.BLACK && colour != ChessEnums.Piece.WHITE)
                     return null;
-                
+
                 var bitMap = [[],[],[],[],[],[],[],[]];
-                
+
                 for (var x = 0; x < 8; x++)
                     for (var y = 0; y < 8; y++)
                         if ((piece = this.getPieceAt(x, y)) !== null)
-                            bitMap[y][x] = (int)(piece.isOfColour(colour));
+                            bitMap[y][x] = piece.isOfSide(colour) ? piece : null;
                         else
-                            bitMap[y][x] = 0;
+                            bitMap[y][x] = null;
                 return bitMap;
             },
-            
+
             getOppositeMapForSide: function(colour) {
-                if (colour == ChessEnums.Pieces.BLACK)
-                    return this.getMapForSide(ChessEnums.Pieces.WHITE);
-                else if (colour == ChessEnums.Pieces.WHITE)
-                    return this.getMapForSide(ChessEnums.Pieces.BLACK);
-                
+                if (colour == ChessEnums.Piece.BLACK)
+                    return this.getMapForSide(ChessEnums.Piece.WHITE);
+                else if (colour == ChessEnums.Piece.WHITE)
+                    return this.getMapForSide(ChessEnums.Piece.BLACK);
+
                 return null;
             },
-            
-            getReferenceCoords: function() { return this.referenceCoords; },
-            setReferenceCoords: function(c) { this.referenceCoords = c; return this; },
-            
+
+            /* 
+             * @description Handles clicks on the board
+             */
             onClick: function(x, y, referer) {
+                // Do nothing if the game is over
+                if (referer.hasGameEnded())
+                    return;
+
                 var offsets = referer.getRenderer().getOffset(),
                     offX = offsets.left,
                     offY = offsets.top,
                     cellSize = referer.getRenderer().getCellSize(),
                     cellX = Math.floor((x - offX) / cellSize),
                     cellY = Math.floor((y - offY) / cellSize);
-                
+
                 if ((origin = referer.getReferenceCoords()) != null) {
                     // Check move validity - The fun starts now!
-                    referer.log('------ Checking move validity now! ------', true);
-                    
+                    referer.log('------ Checking move validity now! ------');
+
                     // Get origin piece
                     if ((sourcePiece = referer.getPieceAt(origin[0], origin[1])) != null) {
-                        referer.log('Trying to move a ' + sourcePiece.toString() + ' from [' + origin.toString() + '] to [' + cellX + ',' + cellY + ']', true);
-                        
+                        referer.log('Trying to move a ' + sourcePiece.toString() + ' to [' + cellX + ',' + cellY + ']');
+
                         // Logging source attack cells
-                        referer.log('Dumping attack cells for the moving piece...', true);
-                        for (var x = 0; x < 8; x++)
-                        {
-                            var str = '';
-                            for (var y = 0; y < 8; y++)
-                                str += sourcePiece.attackCells[y][x] + ' ';
-                            referer.log(str, true);
+                        if (ChessEnums.State.STATE_DUMP_ACS) {
+                            referer.log('Attack cells dump:', true);
+                            for (var x = 0; x < 8; x++)
+                                referer.log('[' + sourcePiece.attackCells[y].toString() + ']');
                         }
-                        
+
                         // Cannot move if the targeted cell contains one of our pieces
-                        if (referer.hasPieceAt(cellX, cellY))
-                            if (referer.getPieceAt(cellX, cellY).isOfSide(sourcePiece.getSide())) {
-                                console.log('The targeted cell contains one of our pieces!', true);
-                                return referer.setReferenceCoords(null);
-                            }
-                        
+                        if (referer.hasPieceAt(cellX, cellY) && referer.getPieceAt(cellX, cellY).isOfSide(sourcePiece.getSide())) {
+                            referer.log('The targeted cell contains one of our pieces!');
+                            return referer.setReferenceCoords(null);
+                        }
+
                         if (sourcePiece.isAttackingCell(cellX, cellY)) {
-                            // Find our king and check:
-                            // 1) If he will be in check after our move
-                            // 2) If he is in check
+                            // Find our king and check if he will be in check after our move
                             var ourKing = referer.findPiece(ChessEnums.Piece.KING | sourcePiece.getSide());
-                            
-                            if (ourKing === null) { // Should never happen
-                                referer.log('Could\'t find out king!', true);
-                                return;
-                            }
-                            //!!! CHECK DETECTION FAILING SOMEHOW
-                            
+
+                            if (ourKing === null) // Should never happen
+                                return referer.log('Could\'t find out king!');
+
                             // 1) Will our king be in check AFTER OUR MOVE ?
+                            //    Check by creating the move, then rolling it back
                             var backupPiece = referer.getPieceAt(cellX, cellY);
                             referer.setPieceAt(cellX, cellY, sourcePiece);
                             sourcePiece.coords = [cellX, cellY];
                             sourcePiece.generateAttackCells();
                             referer.delPieceAt(origin[0], origin[1]);
+
                             var willBeInCheck = false;
                             for (var x = 0; x < 8; x++)
                                 for (var y = 0; y < 8; y++)
                                     if ((itrPiece = referer.getPieceAt(x, y)) !== null)
-                                        if (itrPiece.isAttackingCell(ourKing.getX(), ourKing.getY()) && !itrPiece.isOfSide(ourKing.getSide()))
+                                        if (itrPiece.isCheckCell(ourKing.getX(), ourKing.getY()) && !itrPiece.isOfSide(ourKing.getSide()))
                                             if (!referer.isPieceBetween(itrPiece.getX(), itrPiece.getY(), ourKing.getX(), ourKing.getY()))
                                                 willBeInCheck = true;
 
+                            // Rolling back the move
                             referer.setPieceAt(origin[0], origin[1], referer.getPieceAt(cellX, cellY));
                             referer.setPieceAt(cellX, cellY, backupPiece);
                             sourcePiece.coords = origin;
                             sourcePiece.generateAttackCells();
 
                             if (willBeInCheck) {
-                                referer.log('Our king would be in check.', true);
-                                referer.log('----- Move cannot be proceeded ----', true);
-                                referer.setReferenceCoords(null);
-                                return;
-                            }
-                            
-                            // 2) Is our king in check AT THE MOMENT ?
-                            var isInCheck = false;
-                            for (var x = 0; x < 8; x++)
-                                for (var y = 0; y < 8; y++)
-                                    if ((itrPiece = referer.getPieceAt(x, y)) !== null)
-                                        if (itrPiece.isAttackingCell(ourKing.getX(), ourKing.getY()) && !itrPiece.isOfSide(ourKing.getSide()))
-                                            if (!referer.isPieceBetween(itrPiece.getX(), itrPiece.getY(), ourKing.getX(), ourKing.getY()))
-                                                isInCheck = true;
-                             
-                            if (isInCheck) {
-                                referer.log('Our king is in check.', true);
-                                referer.log('----- Move cannot be proceeded ----', true);
+                                referer.log('Our king would be in check after trying that move.');
+                                referer.log('----- Move cannot be proceeded ----');
                                 referer.setReferenceCoords(null);
                                 return;
                             }
                             else {
                                 // Check if there are ANY pieces between target and dest
                                 if (!referer.isPieceBetween(origin[0], origin[1], cellX, cellY)) {
-                                
-                                    referer.log('----- Valid move, proceeding -----', true);
+
+                                    // Pawn handler - Cannot move diagonally if the targeted cell is empty !
+                                    if (Math.abs(origin[0] - cellX) != 0 && sourcePiece.getTypeMask() & ChessEnums.Piece.PAWN && backupPiece === null) {
+                                        referer.log('Invalid target cell.');
+                                        referer.log('----- Move cannot be proceeded ----');
+                                        referer.setReferenceCoords(null);
+                                        return;
+                                    }
+
+                                    // King castling handler
+                                    var handleCastling = -1;
+                                    if (Math.abs(origin[0] - cellX) == 2 && sourcePiece.getTypeMask() & ChessEnums.Piece.KING && backupPiece === null) {
+                                        if (!referer.hasPieceAt(Math.abs(cellX + origin[0]) / 2, cellY))
+                                            handleCastling = (cellX > origin[0]);
+                                    }
+
+                                    referer.log('---- Valid move, proceeding ----');
                                     referer.setReferenceCoords(null);
-                                    
+
                                     referer.setPieceAt(cellX, cellY, sourcePiece);
                                     referer.delPieceAt(origin[0], origin[1]);
                                     referer.getRenderer().drawTileAt(cellX, cellY, sourcePiece.getTileName());
                                     referer.getRenderer().eraseTile(origin[0], origin[1]);
                                     sourcePiece.coords = [cellX, cellY];
                                     sourcePiece.generateAttackCells();
+
+                                    if (handleCastling != -1 && ourKing.canCastle(handleCastling)) {
+                                        // Grab the rook
+                                        var oldRookCoords = [handleCastling ? 7 : 0, cellY],
+                                            newRookCoords = [handleCastling ? 5 : 3, cellY];
+
+                                        var rook = this.getPieceAt(oldRookCoords[0], oldRookCoords[1]);
+                                        referer.setPieceAt(newRookCoords[0], newRookCoords[1], rook);
+                                        referer.delPieceAt(oldRookCoords[0], oldRookCoords[1]);
+                                        referer.getRenderer().drawTileAt(newRookCoords[0], newRookCoords[1], rook.getTileName());
+                                        referer.getRenderer().eraseTile(oldRookCoords[0], oldRookCoords[1]);
+                                        rook.coords = newRookCoords;
+                                        rook.generateAttackCells();
+                                        sourcePiece.setCastling(handleCastling, false);
+                                    }
+
+                                    if (!ChessEnums.State.STATE_TESTING)
+                                        referer.toggleTurn();
+
+                                    //this.writeMove(cellX, cellY, backupPiece !== null);
+                                    this.findCheckMate();
                                 }
                                 else {
-                                    referer.log('There are pieces between origin and destination.', true);
-                                    referer.log('----- Move cannot be proceeded ----', true);
+                                    referer.log('There are pieces between origin and destination.');
+                                    referer.log('----- Move cannot be proceeded ----');
                                     referer.setReferenceCoords(null);
                                 }
                             }
                         }
                         else {
-                            referer.log('Invalid target cell.', true);
-                            referer.log('----- Move cannot be proceeded ----', true);
+                            referer.log('Invalid target cell.');
+                            referer.log('----- Move cannot be proceeded ----');
                             referer.setReferenceCoords(null);
                         }
                     }
@@ -312,9 +347,31 @@
                 else {
                     if (!referer.hasPieceAt(cellX, cellY))
                         return;
+
+                    // Do nothing if the targeted piece is not ours
+                    if (!referer.getPieceAt(cellX, cellY).isOfSide(referer.getPlayerSide()))
+                        return referer.log('You tried to move a piece that is not yours');
+
+                    if (referer.getCurrentTurn() != referer.getPlayerSide())
+                        return referer.log('It\'s not your turn to move.');
+
                     referer.setReferenceCoords([cellX, cellY]);
-                    referer.log('You clicked cell [' + cellX + ',' + cellY + ']', true);
+                    referer.log('You clicked cell [' + cellX + ',' + cellY + ']');
                 }
+            },
+
+            /*
+             * @description Tries to determine if any side won the game
+             */
+            findCheckMate: function() {
+                var whiteKing = this.findPiece(ChessEnums.Piece.KING | ChessEnums.Piece.WHITE),
+                    blackKing = this.findPiece(ChessEnums.Piece.KING | ChessEnums.Piece.BLACK),
+                    whiteKingAC = whiteKing.getAttackCells(),
+                    blackKingAC = blackKing.getAttackCells(),
+                    blackPiecesMap = this.getOppositeMapForSide(ChessEnums.Piece.WHITE),
+                    whitePiecesMap = this.getOppositeMapForSide(ChessEnums.Piece.BLACK);
+
+                // NYI
             },
         };
 
