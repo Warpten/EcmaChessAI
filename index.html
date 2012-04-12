@@ -13,15 +13,13 @@
     <script src="./js/libs/jquery-1.6.2.js"></script>
     
     <script src="./js/enums.js"></script>
-    <script src="./js/moveControl.js"></script>
-    <script src="./js/tiles.js"></script>
-    <script src="./js/bitboard.js"></script>
     <script src="./js/board.js"></script>
-    <script src="./js/pieces.js"></script>
+    <script src="./js/renderer.js"></script>
+    <script src="./js/piece.js"></script>
     
     <script type="text/javascript">
     $(function() {
-        var board = chessBoard(document.getElementById("drawPlace"));
+        board = ChessBoard(document.getElementById("drawPlace"));
         
         $('#sideSwitcher').click(function() {
            board.switchSide(); 
