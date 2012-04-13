@@ -42,6 +42,8 @@
                     this.currentTurn = ChessEnums.Piece.BLACK;
                 else this.currentTurn = ChessEnums.Piece.WHITE;
             },
+            
+            promotionPiece: null,
 
             /*
              * @description Constructor
@@ -145,7 +147,7 @@
                 }
                 else if (yi == yf) { // Horizontally
                     if (xi > xf) { // Left
-                        for (var x = xf - 1; x < xi; x++)
+                        for (var x = xf + 1; x < xi; x++)
                             if (this.hasPieceAt(x, yi))
                                 return true;
                     }
@@ -161,7 +163,7 @@
                         if (yi > yf) { // Up
                             for (var i = 1; i < diff; i++)
                                 if (this.hasPieceAt(xi - i, yi - i))
-                                    return true
+                                    return true;
                         }
                         else { // Down
                             for (var i = 1; i < diff; i++)
@@ -217,27 +219,17 @@
                 if (referer.hasGameEnded())
                     return;
 
-                var offsets = referer.getRenderer().getOffset(),
-                    offX = offsets.left,
-                    offY = offsets.top,
-                    cellSize = referer.getRenderer().getCellSize(),
-                    cellX = Math.floor((x - offX) / cellSize),
-                    cellY = Math.floor((y - offY) / cellSize);
+                var cellSize = referer.getRenderer().getCellSize(),
+                    cellX = Math.floor((x - referer.getRenderer().getOffset().left) / cellSize),
+                    cellY = Math.floor((y - referer.getRenderer().getOffset().top) / cellSize);
 
-                if ((origin = referer.getReferenceCoords()) != null) {
+                if ((origin = referer.getReferenceCoords()) !== null) {
                     // Check move validity - The fun starts now!
                     referer.log('------ Checking move validity now! ------');
 
                     // Get origin piece
-                    if ((sourcePiece = referer.getPieceAt(origin[0], origin[1])) != null) {
+                    if ((sourcePiece = referer.getPieceAt(origin[0], origin[1])) !== null) {
                         referer.log('Trying to move a ' + sourcePiece.toString() + ' to [' + cellX + ',' + cellY + ']');
-
-                        // Logging source attack cells
-                        if (ChessEnums.State.STATE_DUMP_ACS) {
-                            referer.log('Attack cells dump:', true);
-                            for (var x = 0; x < 8; x++)
-                                referer.log('[' + sourcePiece.attackCells[y].toString() + ']');
-                        }
 
                         // Cannot move if the targeted cell contains one of our pieces
                         if (referer.hasPieceAt(cellX, cellY) && referer.getPieceAt(cellX, cellY).isOfSide(sourcePiece.getSide())) {
@@ -247,10 +239,12 @@
 
                         if (sourcePiece.isAttackingCell(cellX, cellY)) {
                             // Find our king and check if he will be in check after our move
-                            var ourKing = referer.findPiece(ChessEnums.Piece.KING | sourcePiece.getSide());
+                            var ourKing = !(sourcePiece.getTypeMask() & ChessEnums.Piece.KING)
+                                           ? referer.findPiece(ChessEnums.Piece.KING | sourcePiece.getSide())
+                                           : sourcePiece;
 
                             if (ourKing === null) // Should never happen
-                                return referer.log('Could\'t find out king!');
+                                return referer.log('Error, could\'t find out king!', referer).setReferenceCoords(null);
 
                             // 1) Will our king be in check AFTER OUR MOVE ?
                             //    Check by creating the move, then rolling it back
@@ -280,61 +274,102 @@
                                 referer.setReferenceCoords(null);
                                 return;
                             }
-                            else {
-                                // Check if there are ANY pieces between target and dest
-                                if (!referer.isPieceBetween(origin[0], origin[1], cellX, cellY)) {
 
-                                    // Pawn handler - Cannot move diagonally if the targeted cell is empty !
-                                    if (Math.abs(origin[0] - cellX) != 0 && sourcePiece.getTypeMask() & ChessEnums.Piece.PAWN && backupPiece === null) {
-                                        referer.log('Invalid target cell.');
-                                        referer.log('----- Move cannot be proceeded ----');
-                                        referer.setReferenceCoords(null);
+                            // Check if there are ANY pieces between target and dest
+                            if (!referer.isPieceBetween(origin[0], origin[1], cellX, cellY)) {
+                                // Pawn handler - Diagonal moves case
+                                if (Math.abs(origin[0] - cellX) != 0 && sourcePiece.getTypeMask() & ChessEnums.Piece.PAWN) {
+                                    // Disallow moving forward on a busy cell
+                                    if (Math.abs(origin[0] - cellX) == 0 && referer.hasPieceAt(cellX, cellY))
                                         return;
+                            
+                                
+                                    if ((tPiece = this.getPieceAt(cellX, origin[1])) !== null && !tPiece.isOfSide(sourcePiece.getSide())) {
+                                        // Check for En-passant cells
+                                        if (backupPiece === null) {
+                                            if (sourcePiece.isEnPassantCell(cellX, origin[1]) && !sourcePiece.canPerformEnPassant()) {
+                                                referer.log('Cannot perform a en-passant capture!');
+                                                referer.log('----- Move cannot be proceeded ----');
+                                                referer.setReferenceCoords(null);
+                                                return;
+                                            }
+                                            else if (cellY != sourcePiece.getY()) {
+                                                referer.log('Valid en-passant move!');
+                                                referer.delPieceAt(cellX, origin[1]);
+                                                referer.getRenderer().eraseTile(cellX, origin[1]);
+                                            }
+                                        }
                                     }
-
-                                    // King castling handler
-                                    var handleCastling = -1;
-                                    if (Math.abs(origin[0] - cellX) == 2 && sourcePiece.getTypeMask() & ChessEnums.Piece.KING && backupPiece === null) {
-                                        if (!referer.hasPieceAt(Math.abs(cellX + origin[0]) / 2, cellY))
-                                            handleCastling = (cellX > origin[0]);
+                                    else {
+                                        if (backupPiece === null) {
+                                            referer.log('Cannot perform a en-passant capture, no piece to take!');
+                                            referer.log('----- Move cannot be proceeded ----');
+                                            referer.setReferenceCoords(null);
+                                            return;
+                                        }
                                     }
-
-                                    referer.log('---- Valid move, proceeding ----');
-                                    referer.setReferenceCoords(null);
-
-                                    referer.setPieceAt(cellX, cellY, sourcePiece);
-                                    referer.delPieceAt(origin[0], origin[1]);
-                                    referer.getRenderer().drawTileAt(cellX, cellY, sourcePiece.getTileName());
-                                    referer.getRenderer().eraseTile(origin[0], origin[1]);
-                                    sourcePiece.coords = [cellX, cellY];
-                                    sourcePiece.generateAttackCells();
-
-                                    if (handleCastling != -1 && ourKing.canCastle(handleCastling)) {
-                                        // Grab the rook
-                                        var oldRookCoords = [handleCastling ? 7 : 0, cellY],
-                                            newRookCoords = [handleCastling ? 5 : 3, cellY];
-
-                                        var rook = this.getPieceAt(oldRookCoords[0], oldRookCoords[1]);
-                                        referer.setPieceAt(newRookCoords[0], newRookCoords[1], rook);
-                                        referer.delPieceAt(oldRookCoords[0], oldRookCoords[1]);
-                                        referer.getRenderer().drawTileAt(newRookCoords[0], newRookCoords[1], rook.getTileName());
-                                        referer.getRenderer().eraseTile(oldRookCoords[0], oldRookCoords[1]);
-                                        rook.coords = newRookCoords;
-                                        rook.generateAttackCells();
-                                        sourcePiece.setCastling(handleCastling, false);
+                                    
+                                    if ((sourcePiece.isPlayerControlled && cellY == 0) || (!sourcePiece.isPlayerControlled && cellY == 7)) {
+                                        // Promotion
+                                        $('div#promotionBlock').fadeIn(700);
+                                        $('div#promotionBlock img').each(function() {
+                                            if (sourcePiece.isOfSide(ChessEnums.Piece.BLACK))
+                                                this.src = this.src.replace('imgs/w', 'imgs/b');
+                                            else this.src = this.src.replace('imgs/b', 'imgs/w');
+                                        });
+                                        referer.promotionPiece = sourcePiece;
                                     }
-
-                                    if (!ChessEnums.State.STATE_TESTING)
-                                        referer.toggleTurn();
-
-                                    //this.writeMove(cellX, cellY, backupPiece !== null);
-                                    this.findCheckMate();
                                 }
-                                else {
-                                    referer.log('There are pieces between origin and destination.');
-                                    referer.log('----- Move cannot be proceeded ----');
-                                    referer.setReferenceCoords(null);
+
+                                // King castling handler
+                                var handleCastling = -1;
+                                if (Math.abs(origin[0] - cellX) == 2 && sourcePiece.getTypeMask() & ChessEnums.Piece.KING && backupPiece === null) {
+                                    if (!referer.hasPieceAt(Math.abs(cellX + origin[0]) / 2, cellY))
+                                        handleCastling = (cellX > origin[0]);
                                 }
+
+                                referer.log('---- Valid move, proceeding ----');
+                                referer.setReferenceCoords(null);
+
+                                referer.setPieceAt(cellX, cellY, sourcePiece);
+                                referer.delPieceAt(origin[0], origin[1]);
+                                referer.getRenderer().drawTileAt(cellX, cellY, sourcePiece.getTileName());
+                                referer.getRenderer().eraseTile(origin[0], origin[1]);
+                                sourcePiece.coords = [cellX, cellY];
+                                sourcePiece.generateAttackCells();
+                                
+                                // Enable, if possible, the en-passant flag
+                                if (sourcePiece.getTypeMask() & ChessEnums.Piece.PAWN) {
+                                    if ((cellY == 3 && sourcePiece.isPlayerControlled) || (cellY == 4 && !sourcePiece.isPlayerControlled)) {
+                                        sourcePiece.setEnPassantState(1);
+                                    }
+                                }
+
+                                if (handleCastling != -1 && sourcePiece.canCastle(handleCastling) && sourcePiece.getTypeMask() & ChessEnums.Piece.KING) {
+                                    // Moving the rook to the castled cell
+                                    var oldRookCoords = [handleCastling ? 7 : 0, cellY],
+                                        newRookCoords = [handleCastling ? 5 : 3, cellY];
+
+                                    var rook = this.getPieceAt(oldRookCoords[0], oldRookCoords[1]);
+                                    referer.setPieceAt(newRookCoords[0], newRookCoords[1], rook);
+                                    referer.delPieceAt(oldRookCoords[0], oldRookCoords[1]);
+                                    referer.getRenderer().drawTileAt(newRookCoords[0], newRookCoords[1], rook.getTileName());
+                                    referer.getRenderer().eraseTile(oldRookCoords[0], oldRookCoords[1]);
+                                    rook.coords = newRookCoords;
+                                    rook.generateAttackCells();
+                                    sourcePiece.setCastling(handleCastling, false);
+                                }
+
+                                if (!ChessEnums.State.STATE_TESTING)
+                                    referer.toggleTurn();
+
+                                //this.writeMove(cellX, cellY, backupPiece !== null);
+                                this.findCheckMate();
+                            }
+                            else {
+                                referer.log('There are pieces between origin and destination.');
+                                referer.log('----- Move cannot be proceeded ----');
+                                referer.setReferenceCoords(null);
                             }
                         }
                         else {
@@ -349,14 +384,24 @@
                         return;
 
                     // Do nothing if the targeted piece is not ours
-                    if (!referer.getPieceAt(cellX, cellY).isOfSide(referer.getPlayerSide()))
+                    if (!referer.getPieceAt(cellX, cellY).isOfSide(referer.getPlayerSide()) && !ChessEnums.State.STATE_TESTING)
                         return referer.log('You tried to move a piece that is not yours');
 
-                    if (referer.getCurrentTurn() != referer.getPlayerSide())
+                    if (referer.getCurrentTurn() != referer.getPlayerSide() && !ChessEnums.State.STATE_TESTING)
                         return referer.log('It\'s not your turn to move.');
 
                     referer.setReferenceCoords([cellX, cellY]);
                     referer.log('You clicked cell [' + cellX + ',' + cellY + ']');
+                    
+                    if (ChessEnums.State.STATE_DUMP_ACS) {
+                        referer.log('Attack cells dump:', true);
+                        for (var x = 0; x < 8; x++) {
+                            var str = [];
+                            for (var y = 0; y < 8; y++)
+                                str.push(referer.getPieceAt(cellX, cellY).attackCells[y][x]);
+                            referer.log('[' + str.join(' ') + ']');
+                        }
+                    }
                 }
             },
 
@@ -372,6 +417,15 @@
                     whitePiecesMap = this.getOppositeMapForSide(ChessEnums.Piece.BLACK);
 
                 // NYI
+            },
+            
+            promotePiece: function(to) {
+                if (this.promotionPiece === null)
+                    return;
+                
+                this.promotionPiece.promote(to);
+                this.getRenderer().drawTileAt(this.promotionPiece.getX(), this.promotionPiece.getY(), this.promotionPiece.getTileName());
+                this.promotionPiece = null;
             },
         };
 

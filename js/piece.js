@@ -17,14 +17,20 @@
             isPlayerControlled: false,
             toggleControl: function() { this.isPlayerControlled = !this.isPlayerControlled; },
 
-            canCastle: function(side) { return side ? this.castling[0] : this.castling[1]; },
+            canCastle: function(side)        { return side ? this.castling[0] : this.castling[1]; },
             setCastling: function(side, val) { this.castling[side ? 0 : 1] = val; },
 
+            enPassant: 0,
+            setEnPassantState: function(state) { this.enPassant = state; },
+            getEnPassantState: function()      { return this.enPassant; },
+            canPerformEnPassant: function()    { return this.enPassant == 1; },
+
             init: function(typeMask, coords, isPlayerControlling) {
-                this.typeMask = typeMask;
-                this.coords   = coords;
+                this.typeMask  = typeMask;
+                this.coords    = coords;
                 this.isPlayerControlled = isPlayerControlling;
-                this.castling = [true, true];
+                this.castling  = [true, true];
+                this.enPassant = 0;
 
                 var tileName = 'w';
                 this.name = 'White ';
@@ -61,10 +67,10 @@
 
             getTileName: function() { return this.tileImage; },
             getTypeMask: function() { return this.typeMask; },
-            getX: function() { return this.coords[0]; },
-            getY: function() { return this.coords[1]; },
-            getSide: function() { return this.side; },
-            isOfSide: function(t) { return this.side == t; },
+            getX: function()        { return this.coords[0]; },
+            getY: function()        { return this.coords[1]; },
+            getSide: function()     { return this.side; },
+            isOfSide: function(t)   { return this.side == t; },
 
             toString: function() { return (this.isPlayerControlled ? 'Player-controlled ' : 'AI-controlled ') + this.name + ' at [' + this.coords.toString() + ']'; },
 
@@ -125,8 +131,18 @@
                     else {
                         if (xi >= 0 && xi < 7)
                             this.attackCells[xi + 1][yi + 1] = 1;
+
                         if (xi > 0)
                             this.attackCells[xi - 1][yi + 1] = 1;
+                    }
+
+                    // En passant cells
+                    if (((yi == 3 && this.isPlayerControlled) || (yi == 4 && !this.isPlayerControlled))) {
+                        if (xi >= 0)
+                            this.attackCells[xi - 1][yi] = 2;
+
+                        if (xi < 7)
+                            this.attackCells[xi + 1][yi] = 2;
                     }
                 }
 
@@ -136,10 +152,9 @@
 
                 return this.attackCells;
             },
-
-            isAttackingCell: function(x, y) {
-                return this.attackCells[x][y] == 1;
-            },
+            
+            isEnPassantCell: function(x, y) { return this.attackCells[x][y] == 2; },
+            isAttackingCell: function(x, y) { return this.attackCells[x][y] > 0; },
 
             isCheckCell: function(x, y) {
                 // This method adresses issues with pawns. If it's not working on a pawn,
@@ -155,7 +170,38 @@
                 var cols = 'abcdefgh';
                 text += cols.charAt(xf);
                 return text + yf;
-            }
+            },
+            
+            promote: function(to) {
+                var tileName = 'w';
+                this.name = 'White ';
+                this.side = ChessEnums.Piece.WHITE;
+                if (this.typeMask & ChessEnums.Piece.BLACK) {
+                    tileName = 'b';
+                    this.name = 'Black ';
+                    this.side = ChessEnums.Piece.BLACK;
+                }
+                
+                var charMap = 'kqnbr';
+                tileName += charMap.charAt(to);
+                this.typeMask = this.side | (1 << to);
+                this.tileImage = tileName;
+
+                if (this.typeMask & ChessEnums.Piece.KING)
+                    this.name += 'King';
+                if (this.typeMask & ChessEnums.Piece.QUEEN)
+                    this.name += 'Queen';
+                if (this.typeMask & ChessEnums.Piece.KNIGHT)
+                    this.name += 'Knight';
+                if (this.typeMask & ChessEnums.Piece.BISHOP)
+                    this.name += 'Bishop';
+                if (this.typeMask & ChessEnums.Piece.ROOK)
+                    this.name += 'Rook';
+                if (this.typeMask & ChessEnums.Piece.PAWN)
+                    this.name += 'Pawn';
+                
+                this.generateAttackCells();
+            },
         };
 
         return Piece;

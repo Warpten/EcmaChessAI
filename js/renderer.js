@@ -7,7 +7,7 @@
         ChessRenderer.fn = ChessRenderer.prototype = {
             constructor: ChessRenderer,
 
-            cellSize: 60,
+            cellSize: 40,
             domNode: null,
             ctx: null,
             offset: null,
@@ -33,26 +33,15 @@
             },
 
             rotate: function() {
-                if ($(this.domNode).css('background-position') == '60px 0px')
+                if ($(this.domNode).css('background-position') == this.getCellSize() + 'px 0px')
                     $(this.domNode).css('background-position', '0 0');
                 else
-                    $(this.domNode).css('background-position', '60px 0');
+                    $(this.domNode).css('background-position', this.getCellSize() + 'px 0');
             },
 
-            getOffset: function() {
-                return this.offset;
-            },
+            getOffset: function() { return this.offset; },
 
             getCellSize: function() { return this.cellSize; },
-            setCellSize: function(size) { this.rescaleDOMNode().cellSize = size; },
-
-            rescaleDOMNode: function() {
-                $(domNode).css({
-                    'width': (this.getCellSize() * 8) + 'px',
-                    'height': (this.getCellSize() * 8) + 'px',
-                });
-                return this;
-            },
 
             drawTileAt: function(x, y, imageUrl) {
                 this.eraseTile(x, y);
