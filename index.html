@@ -17,6 +17,7 @@
         p#youreplaying span { font-weight: bold; }
         
         canvas {
+            display: block;
             border-radius: 3px;
             margin-left: auto;
             margin-right: auto;
@@ -28,6 +29,35 @@
             height: auto;
             margin-left: auto;
             margin-right: auto;
+            position: relative;
+        }
+        
+        div#promotionBlock {
+            display: none;
+            border: 1px solid black;
+            text-align: center;
+            width: 400px;
+            border-radius: 2px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            top: -215px;
+            margin-bottom: -109px;
+            background-color: white;
+            padding-bottom: 5px;
+            box-shadow: -1px -1px 2px rgba(9, 9, 9, 0.2), 1px -1px 2px rgba(9, 9, 9, 0.2), 1px 1px 2px rgba(9, 9, 9, 0.2), -1px 1px 2px rgba(9, 9, 9, 0.2);
+        }
+        
+        div#promotionBlock a {
+            border: 1px solid white;
+            display: inline-block;
+        }
+        
+        div#promotionBlock a:hover {
+            border: 1px solid black;
+            box-shadow: -1px -1px 2px rgba(9, 9, 9, 0.2), 1px -1px 2px rgba(9, 9, 9, 0.2), 1px 1px 2px rgba(9, 9, 9, 0.2), -1px 1px 2px rgba(9, 9, 9, 0.2);
+            border-radius: 4px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -35,10 +65,19 @@
 <body>
     <canvas id="drawPlace">Your browser needs to handle canvas for this demo to work.</canvas>
 
+    <div id="promotionBlock">
+        <p>Pick what you want your pawn to become:</p>
+        <a role="1"><img src="./imgs/wq.png" alt="" /></a>
+        <a role="4"><img src="./imgs/wr.png" alt="" /></a>
+        <a role="3"><img src="./imgs/wb.png" alt="" /></a>
+        <a role="2"><img src="./imgs/wn.png" alt="" /></a>
+    </div>
+    
     <p id="youreplaying">You are playing as <span>white</span></p>
     <input type="button" value="Switch sides" id="sideSwitcher" />
     <input type="button" value="Reset the game" id="resetBoard" />
     <input type="checkbox" id="toggleDebug" /> Debug mode
+    <input type="checkbox" id="toggleDump" /> Dump Attack Cells
     <!-- Using non-minimized version for development -->
     <script src="./js/libs/jquery-1.6.2.js"></script>
 
@@ -52,7 +91,12 @@
     // Properties defined globally are shared and modified GLOBALLY.
     $(function() {
         board = ChessBoard(document.getElementById('drawPlace'));
-
+        if (ChessEnums.State.STATE_TESTING)
+            $('#toggleDebug').attr('checked', 'checked');
+        
+        if (ChessEnums.State.STATE_DUMP_ACS)
+            $('#toggleDump').attr('checked', 'checked');
+        
         $('#sideSwitcher').click(function() {
            board.switchSide();
            $('#youreplaying span').html((board.getPlayerSide() == ChessEnums.Piece.BLACK ? 'black' : 'white') + '.');
@@ -65,6 +109,21 @@
         $('#toggleDebug').click(function() {
             ChessEnums.State.STATE_TESTING = !ChessEnums.State.STATE_TESTING;
             board.initBoard();
+        });
+        
+        $('#toggleDump').click(function() {
+            ChessEnums.State.STATE_DUMP_ACS = !ChessEnums.State.STATE_DUMP_ACS;
+            board.initBoard();
+        });
+        
+        $('div#promotionBlock img').css({
+            'width': board.getRenderer().getCellSize() + 'px',
+            'height': board.getRenderer().getCellSize() + 'px',
+        });
+        
+        $('div#promotionBlock a').click(function() {
+            $(this).parent().css('display', 'none');
+            board.promotePiece($(this).attr('role'));
         });
     });
     </script>
