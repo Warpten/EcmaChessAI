@@ -149,12 +149,12 @@
                     if (xi > xf) { // Left
                         for (var x = xf + 1; x < xi; x++)
                             if (this.hasPieceAt(x, yi))
-                                return true;
+                                return this.log('Horizontal left collision at [' + x + ',' + yi + ']', true);
                     }
                     else { // Right
                         for (var x = xi + 1; x < xf; x++)
                             if (this.hasPieceAt(x, yi))
-                                return true;
+                                return this.log('Horizontal right collision at [' + x + ',' + yi + ']', true);
                     }
                 }
                 else if (Math.abs(xi - xf) == Math.abs(yi - yf)) { // Diagonally
@@ -163,7 +163,7 @@
                         if (yi > yf) { // Up
                             for (var i = 1; i < diff; i++)
                                 if (this.hasPieceAt(xi - i, yi - i))
-                                    return true;
+                                    return true
                         }
                         else { // Down
                             for (var i = 1; i < diff; i++)
@@ -180,7 +180,7 @@
                         else { // Down
                             for (var i = 1; i < diff; i++)
                                 if (this.hasPieceAt(xi + i, yi + i))
-                                    return true
+                                    return true;
                         }
                     }
                 }
@@ -223,12 +223,12 @@
                     cellX = Math.floor((x - referer.getRenderer().getOffset().left) / cellSize),
                     cellY = Math.floor((y - referer.getRenderer().getOffset().top) / cellSize);
 
-                if ((origin = referer.getReferenceCoords()) !== null) {
+                if ((origin = referer.getReferenceCoords()) != null) {
                     // Check move validity - The fun starts now!
                     referer.log('------ Checking move validity now! ------');
 
                     // Get origin piece
-                    if ((sourcePiece = referer.getPieceAt(origin[0], origin[1])) !== null) {
+                    if ((sourcePiece = referer.getPieceAt(origin[0], origin[1])) != null) {
                         referer.log('Trying to move a ' + sourcePiece.toString() + ' to [' + cellX + ',' + cellY + ']');
 
                         // Cannot move if the targeted cell contains one of our pieces
@@ -282,8 +282,7 @@
                                     // Disallow moving forward on a busy cell
                                     if (Math.abs(origin[0] - cellX) == 0 && referer.hasPieceAt(cellX, cellY))
                                         return;
-                            
-                                
+
                                     if ((tPiece = this.getPieceAt(cellX, origin[1])) !== null && !tPiece.isOfSide(sourcePiece.getSide())) {
                                         // Check for En-passant cells
                                         if (backupPiece === null) {
@@ -308,17 +307,17 @@
                                             return;
                                         }
                                     }
-                                    
-                                    if ((sourcePiece.isPlayerControlled && cellY == 0) || (!sourcePiece.isPlayerControlled && cellY == 7)) {
-                                        // Promotion
-                                        $('div#promotionBlock').fadeIn(700);
-                                        $('div#promotionBlock img').each(function() {
-                                            if (sourcePiece.isOfSide(ChessEnums.Piece.BLACK))
-                                                this.src = this.src.replace('imgs/w', 'imgs/b');
-                                            else this.src = this.src.replace('imgs/b', 'imgs/w');
-                                        });
-                                        referer.promotionPiece = sourcePiece;
-                                    }
+                                }
+                                
+                                // Promoting a pawn
+                                if (sourcePiece.getTypeMask() & ChessEnums.Piece.PAWN && ((sourcePiece.isPlayerControlled && cellY == 0) || (!sourcePiece.isPlayerControlled && cellY == 7))) {
+                                    $('div#promotionBlock').fadeIn(700);
+                                    $('div#promotionBlock img').each(function() {
+                                        if (sourcePiece.isOfSide(ChessEnums.Piece.BLACK))
+                                            this.src = this.src.replace('imgs/w', 'imgs/b');
+                                        else this.src = this.src.replace('imgs/b', 'imgs/w');
+                                    });
+                                    referer.promotionPiece = sourcePiece;
                                 }
 
                                 // King castling handler

@@ -138,7 +138,7 @@
 
                     // En passant cells
                     if (((yi == 3 && this.isPlayerControlled) || (yi == 4 && !this.isPlayerControlled))) {
-                        if (xi >= 0)
+                        if (xi > 0)
                             this.attackCells[xi - 1][yi] = 2;
 
                         if (xi < 7)
