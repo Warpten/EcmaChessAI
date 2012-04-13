@@ -149,12 +149,12 @@
                     if (xi > xf) { // Left
                         for (var x = xf + 1; x < xi; x++)
                             if (this.hasPieceAt(x, yi))
-                                return this.log('Horizontal left collision at [' + x + ',' + yi + ']', true);
+                                return true;
                     }
                     else { // Right
                         for (var x = xi + 1; x < xf; x++)
                             if (this.hasPieceAt(x, yi))
-                                return this.log('Horizontal right collision at [' + x + ',' + yi + ']', true);
+                                return true;
                     }
                 }
                 else if (Math.abs(xi - xf) == Math.abs(yi - yf)) { // Diagonally
@@ -223,12 +223,12 @@
                     cellX = Math.floor((x - referer.getRenderer().getOffset().left) / cellSize),
                     cellY = Math.floor((y - referer.getRenderer().getOffset().top) / cellSize);
 
-                if ((origin = referer.getReferenceCoords()) != null) {
+                if ((origin = referer.getReferenceCoords()) !== null) {
                     // Check move validity - The fun starts now!
                     referer.log('------ Checking move validity now! ------');
 
                     // Get origin piece
-                    if ((sourcePiece = referer.getPieceAt(origin[0], origin[1])) != null) {
+                    if ((sourcePiece = referer.getPieceAt(origin[0], origin[1])) !== null) {
                         referer.log('Trying to move a ' + sourcePiece.toString() + ' to [' + cellX + ',' + cellY + ']');
 
                         // Cannot move if the targeted cell contains one of our pieces
